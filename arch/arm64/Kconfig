@@ -1516,6 +1516,12 @@ config MACH_XIAOMI_F9S
         help
           Support for Xiaomi Mi A3
 
+config MACH_XIAOMI_C3J
+        bool "ginkgo board"
+        select MACH_XIAOMI_TRINKET
+        help
+          Support for Xiaomi Redmi Note 8
+
 endmenu
 
 endmenu
