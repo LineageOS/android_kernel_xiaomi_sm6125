@@ -854,8 +854,8 @@ int goodix_ts_unregister_notifier(struct notifier_block *nb)
 EXPORT_SYMBOL(goodix_ts_unregister_notifier);
 
 /**
- * fb_notifier_call_chain - notify clients of fb_events
- *	see enum ts_notify_event in goodix_ts_core.h
+ * msm_drm_notifier_call_chain - notify clients of msm_drm_notifier
+ * see enum ts_notify_event in goodix_ts_core.h
  */
 int goodix_ts_blocking_notify(enum ts_notify_event evt, void *v)
 {
@@ -1767,40 +1767,40 @@ out:
 
 #ifdef CONFIG_FB
 /**
- * goodix_ts_fb_notifier_callback - Framebuffer notifier callback
- * Called by kernel during framebuffer blanck/unblank phrase
+ * goodix_ts_msm_drm_notifier_callback - msm drm notifier callback
+ * Called by kernel during drm blanck/unblank phrase
  */
-static void fb_notify_resume_work(struct work_struct  *work)
+static void msm_drm_notify_resume_work(struct work_struct  *work)
 {
 	struct goodix_ts_core *core_data =
-		container_of(work, struct goodix_ts_core, fb_notify_work);
+		container_of(work, struct goodix_ts_core, msm_drm_notify_work);
 	ts_info("Try resume in workqueue!\n");
 	goodix_ts_resume(core_data);
 }
-int goodix_ts_fb_notifier_callback(struct notifier_block *self,
+int goodix_ts_msm_drm_notifier_callback(struct notifier_block *self,
 	unsigned long event, void *data)
 {
 	struct goodix_ts_core *core_data =
-		container_of(self, struct goodix_ts_core, fb_notifier);
-	struct msm_drm_notifier *evdata = data;
+		container_of(self, struct goodix_ts_core, msm_drm_notifier);
+	struct msm_drm_notifier *msm_drm_event = data;
 
-	if (evdata && evdata->data && core_data) {
+	if (msm_drm_event && msm_drm_event->data && core_data) {
 		if (event == MSM_DRM_EVENT_BLANK) {
 			/* before fb blank */
 		} else if (event == MSM_DRM_EARLY_EVENT_BLANK) {
-			int *blank = evdata->data;
+			int *blank = msm_drm_event->data;
 			if (*blank == MSM_DRM_BLANK_UNBLANK) {
 				if (!atomic_read(&core_data->suspended)) {
 					ts_info("Already in resume state");
 					return 0;
 				}
-				queue_work(system_unbound_wq, &core_data->fb_notify_work);
+				queue_work(system_unbound_wq, &core_data->msm_drm_notify_work);
 			} else if (*blank == MSM_DRM_BLANK_POWERDOWN) {
 				if (atomic_read(&core_data->suspended)) {
 					ts_info("Already in suspend state");
 					return 0;
 				}
-				cancel_work_sync(&core_data->fb_notify_work);
+				cancel_work_sync(&core_data->msm_drm_notify_work);
 				goodix_ts_suspend(core_data);
 			}
 		}
@@ -2088,7 +2088,7 @@ static int goodix_ts_probe(struct platform_device *pdev)
 	if (r < 0)
 		goto out;
 #if CONFIG_FB
-	INIT_WORK(&core_data->fb_notify_work, fb_notify_resume_work);
+	INIT_WORK(&core_data->msm_drm_notify_work, msm_drm_notify_resume_work);
 #endif
 	/*create sysfs files*/
 	goodix_ts_sysfs_init(core_data);
