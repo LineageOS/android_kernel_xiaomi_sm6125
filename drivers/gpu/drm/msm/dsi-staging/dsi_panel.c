@@ -515,6 +515,12 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
 		goto error_disable_vregs;
 	}
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	/* If LP11_INIT is set, skip panel reset here*/
+	if (panel->lp11_init)
+		goto exit;
+#endif
+
 	rc = dsi_panel_reset(panel);
 	if (rc) {
 		pr_err("[%s] failed to reset panel, rc=%d\n", panel->name, rc);
@@ -4277,9 +4283,11 @@ int dsi_panel_pre_prepare(struct dsi_panel *panel)
 
 	mutex_lock(&panel->panel_lock);
 
+#ifndef CONFIG_MACH_XIAOMI_F9S
 	/* If LP11_INIT is set, panel will be powered up during prepare() */
 	if (panel->lp11_init)
 		goto error;
+#endif
 
 	rc = dsi_panel_power_on(panel);
 	if (rc) {
@@ -4461,12 +4469,20 @@ int dsi_panel_prepare(struct dsi_panel *panel)
 	mutex_lock(&panel->panel_lock);
 
 	if (panel->lp11_init) {
+#ifdef CONFIG_MACH_XIAOMI_F9S
+		rc = dsi_panel_reset(panel);
+		if (rc) {
+			pr_err("[%s] failed to reset panel, rc=%d\n", panel->name, rc);
+			goto error;
+		}
+#else
 		rc = dsi_panel_power_on(panel);
 		if (rc) {
 			pr_err("[%s] panel power on failed, rc=%d\n",
 			       panel->name, rc);
 			goto error;
 		}
+#endif
 	}
 
 	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_PRE_ON);
@@ -4982,6 +4998,17 @@ int dsi_panel_unprepare(struct dsi_panel *panel)
 		goto error;
 	}
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	if (!panel->lp11_init) {
+		rc = dsi_panel_power_off(panel);
+		if (rc) {
+			pr_err("[%s] panel power_Off failed, rc=%d\n",
+			       panel->name, rc);
+			goto error;
+		}
+	}
+#endif
+
 error:
 	mutex_unlock(&panel->panel_lock);
 	return rc;
@@ -4998,12 +5025,25 @@ int dsi_panel_post_unprepare(struct dsi_panel *panel)
 
 	mutex_lock(&panel->panel_lock);
 
-	rc = dsi_panel_power_off(panel);
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	if (panel->lp11_init) {
+		rc = dsi_panel_power_off(panel);
+		if (rc) {
+			pr_err("[%s] panel power_Off failed, rc=%d\n",
+			       panel->name, rc);
+			goto error;
+		}
+	}
+#else
+    rc = dsi_panel_power_off(panel);
 	if (rc) {
 		pr_err("[%s] panel power_Off failed, rc=%d\n",
 		       panel->name, rc);
 		goto error;
 	}
+#endif
+
+
 error:
 	mutex_unlock(&panel->panel_lock);
 	return rc;
