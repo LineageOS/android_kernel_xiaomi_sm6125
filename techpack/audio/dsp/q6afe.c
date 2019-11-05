@@ -441,7 +441,6 @@ static int32_t sp_make_afe_callback(uint32_t opcode, uint32_t *payload,
 			return -EINVAL;
 		}
 		data_dest = (u32 *) &this_afe.xt_logging_resp;
-		break;
 	default:
 		pr_err("%s: Unrecognized param ID %d\n", __func__,
 		       param_hdr.param_id);
@@ -1734,7 +1733,6 @@ int afe_dsm_set_calib(uint8_t* payload)
 {
 	return afe_dsm_set_params(DSM_TX_PORT_ID, AFE_MODULE_DSM_TX, AFE_PARAM_ID_CALIB, payload, sizeof(uint32_t)*3);
 }
-
 
 int afe_dsm_ramp_dn_cfg(uint8_t *payload, uint32_t delay_in_ms)
 {
