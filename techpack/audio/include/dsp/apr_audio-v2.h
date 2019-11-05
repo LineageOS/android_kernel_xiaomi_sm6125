@@ -2022,6 +2022,32 @@ struct afe_port_cmd_set_param_v3 {
 	u8 param_data[0];
 } __packed;
 
+#ifdef CONFIG_SND_SOC_MAX98937
+struct afe_port_param_data_v2 {
+	u32 module_id;
+/* ID of the module to be configured.
+ * Supported values: Valid module ID
+ */
+
+u32 param_id;
+/* ID of the parameter corresponding to the supported parameters
+ * for the module ID.
+ * Supported values: Valid parameter ID
+ */
+
+u16 param_size;
+/* Actual size of the data for the
+ * module_id/param_id pair. The size is a
+ * multiple of four bytes.
+ * Supported values: > 0
+ */
+
+u16 reserved;
+/* This field must be set to zero.
+ */
+} __packed;
+#endif
+
 /* Payload of the #AFE_PARAM_ID_LOOPBACK_GAIN_PER_PATH parameter,
  * which gets/sets loopback gain of a port to an Rx port.
  * The Tx port ID of the loopback is part of the set_param command.
@@ -11493,6 +11519,15 @@ struct afe_digital_clk_cfg {
 /* This field must be set to zero. */
 	u16                  reserved;
 } __packed;
+
+#ifdef CONFIG_SND_SOC_MAX98937
+struct afe_lpass_digital_clk_config_command {
+	struct apr_hdr			 hdr;
+	struct afe_port_cmd_set_param_v2 param;
+	struct afe_port_param_data_v2    pdata;
+	struct afe_digital_clk_cfg clk_cfg;
+} __packed;
+#endif
 
 /*
  * Opcode for AFE to start DTMF.
