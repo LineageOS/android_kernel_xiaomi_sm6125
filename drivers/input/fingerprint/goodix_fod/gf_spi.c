@@ -47,7 +47,7 @@
 #include <linux/pm_wakeup.h>
 #include <drm/drm_bridge.h>
 #ifndef GOODIX_DRM_INTERFACE_WA
-#include <drm/drm_notifier.h>
+#include <linux/msm_drm_notify.h>
 #endif
 
 #include "gf_spi.h"
@@ -714,7 +714,7 @@ static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 	if (evdata && evdata->data && val == DRM_EVENT_BLANK && gf_dev) {
 		blank = *(int *)(evdata->data);
 		switch (blank) {
-		case DRM_BLANK_POWERDOWN:
+		case MSM_DRM_BLANK_POWERDOWN:
 			if (gf_dev->device_available == 1) {
 				gf_dev->fb_black = 1;
 				gf_dev->wait_finger_down = true;
@@ -729,7 +729,7 @@ static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 #endif
 			}
 			break;
-		case DRM_BLANK_UNBLANK:
+		case MSM_DRM_BLANK_UNBLANK:
 			if (gf_dev->device_available == 1) {
 				gf_dev->fb_black = 0;
 #if defined(GF_NETLINK_ENABLE)
@@ -856,7 +856,7 @@ static int gf_probe(struct platform_device *pdev)
 
 #ifndef GOODIX_DRM_INTERFACE_WA
 	gf_dev->notifier = goodix_noti_block;
-	drm_register_client(&gf_dev->notifier);
+	msm_drm_register_client(&gf_dev->notifier);
 #endif
 
 	gf_dev->irq = gf_irq_num(gf_dev);
@@ -921,7 +921,7 @@ static int gf_remove(struct platform_device *pdev)
 		gf_cleanup(gf_dev);
 
 #ifndef GOODIX_DRM_INTERFACE_WA
-	drm_unregister_client(&gf_dev->notifier);
+	msm_drm_unregister_client(&gf_dev->notifier);
 #endif
 	mutex_unlock(&device_list_lock);
 
