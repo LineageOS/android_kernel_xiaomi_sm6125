@@ -116,3 +116,4 @@ obj-$(CONFIG_TOUCHSCREEN_GOODIX_GTX8)	+= goodix_gtx8/
 obj-$(CONFIG_TOUCHSCREEN_TID_SUPPORT)	+= touch-info.o
 obj-$(CONFIG_TOUCHSCREEN_XIAOMI_C3J) += nt36xxx_spi_c3j/
 obj-$(CONFIG_TOUCHSCREEN_XIAOMI_C3J) += ft8719_spi_c3j/
+obj-$(CONFIG_TOUCHSCREEN_COMMON)	+= tp_common.o
