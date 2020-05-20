@@ -174,6 +174,9 @@ enum sde_stage {
 	SDE_STAGE_8,
 	SDE_STAGE_9,
 	SDE_STAGE_10,
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	SDE_STAGE_11,
+#endif
 	SDE_STAGE_MAX
 };
 enum sde_dspp {
