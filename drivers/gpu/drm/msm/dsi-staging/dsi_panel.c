@@ -948,6 +948,13 @@ static int dsi_panel_set_hbm(struct dsi_panel *panel, bool enabled)
 
 static u32 dsi_panel_get_backlight(struct dsi_panel *panel)
 {
+	if (panel->doze_status) {
+		if (panel->hbm_enabled)
+			return panel->bl_config.bl_doze_hbm;
+		else
+			return panel->bl_config.bl_doze_lpm;
+	}
+
 	return panel->bl_config.bl_level;
 }
 #endif
@@ -2842,6 +2849,24 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
 		"qcom,mdss-dsi-bl-inverted-dbv");
 
 #ifdef CONFIG_MACH_XIAOMI_F9S
+	rc = utils->read_u32(utils->data, "qcom,disp-doze-lbm-backlight",
+				  &val);
+	if (rc) {
+		panel->bl_config.bl_doze_lpm = 0;
+		pr_debug("[%s] set doze lpm backlight to 0\n", panel->name);
+	} else {
+		panel->bl_config.bl_doze_lpm = val;
+	}
+
+	rc = utils->read_u32(utils->data, "qcom,disp-doze-hbm-backlight",
+				  &val);
+	if (rc) {
+		panel->bl_config.bl_doze_hbm = 0;
+		pr_debug("[%s] set doze hbm backlight to 0\n", panel->name);
+	} else {
+		panel->bl_config.bl_doze_hbm = val;
+	}
+
 	rc = dsi_panel_parse_fod_dim_lut(panel, utils);
 	if (rc)
 		pr_err("[%s failed to parse fod dim lut\n", panel->name);
