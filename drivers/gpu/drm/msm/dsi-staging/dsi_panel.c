@@ -921,6 +921,12 @@ static int dsi_panel_update_backlight_external(struct dsi_panel *panel, u32 bl_l
 	return 0;
 }
 #endif
+#ifdef CONFIG_MACH_XIAOMI_F9S
+static u32 dsi_panel_get_backlight(struct dsi_panel *panel)
+{
+	return panel->bl_config.bl_level;
+}
+#endif
 
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 {
