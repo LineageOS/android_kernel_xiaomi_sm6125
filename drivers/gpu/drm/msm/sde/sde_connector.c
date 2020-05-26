@@ -96,6 +96,9 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
 #ifdef CONFIG_MACH_XIAOMI_F9S
 	if (brightness > PANEL_BRIGHTNESS_MAX_LEVEL)
 		brightness = PANEL_BRIGHTNESS_MAX_LEVEL;
+
+	if(brightness && brightness < display->panel->bl_config.bl_min_level)
+		brightness = display->panel->bl_config.bl_min_level;
 #else
 	if (brightness > display->panel->bl_config.bl_max_level)
 		brightness = display->panel->bl_config.bl_max_level;
