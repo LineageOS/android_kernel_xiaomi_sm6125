@@ -6004,7 +6004,29 @@ error:
 }
 
 #ifdef CONFIG_MACH_XIAOMI_F9S
+static ssize_t sysfs_fod_ui_read(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct dsi_display *display;
+	bool status;
+
+	display = dev_get_drvdata(dev);
+	if (!display) {
+		pr_err("Invalid display\n");
+		return -EINVAL;
+	}
+
+	status = atomic_read(&display->fod_ui);
+
+	return snprintf(buf, PAGE_SIZE, "%d\n", status);
+}
+
+static DEVICE_ATTR(fod_ui, 0444,
+			sysfs_fod_ui_read,
+			NULL);
+
 static struct attribute *display_fs_attrs[] = {
+	&dev_attr_fod_ui.attr,
 	NULL,
 };
 static struct attribute_group display_fs_attrs_group = {
@@ -6042,6 +6064,15 @@ static int dsi_display_sysfs_deinit(struct dsi_display *display)
 	return 0;
 
 }
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+void dsi_display_set_fod_ui(struct dsi_display *display, bool status)
+{
+	struct device *dev = &display->pdev->dev;
+	atomic_set(&display->fod_ui, status);
+	sysfs_notify(&dev->kobj, NULL, "fod_ui");
+}
+#endif
 
 /**
  * dsi_display_bind - bind dsi device with controlling device
@@ -6348,6 +6379,9 @@ static void dsi_display_unbind(struct device *dev,
 	}
 
 	atomic_set(&display->clkrate_change_pending, 0);
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	atomic_set(&display->fod_ui, false);
+#endif
 	(void)dsi_display_sysfs_deinit(display);
 	(void)dsi_display_debugfs_deinit(display);
 
