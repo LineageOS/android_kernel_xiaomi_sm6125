@@ -293,6 +293,9 @@ struct dsi_display {
 	struct dsi_display_boot_param *boot_disp;
 
 	u32 te_source;
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	atomic_t fod_ui;
+#endif
 };
 
 int dsi_display_dev_probe(struct platform_device *pdev);
@@ -739,6 +742,8 @@ int dsi_lowpower_register_client(struct notifier_block *nb);
 int dsi_display_param_store(struct dsi_display *display, uint32_t param);
 
 struct dsi_display *get_main_display(void);
+
+void dsi_display_set_fod_ui(struct dsi_display *display, bool status);
 #endif
 
 #endif /* _DSI_DISPLAY_H_ */
