@@ -41,7 +41,6 @@
 #include <linux/pm_qos.h>
 #include <linux/cpufreq.h>
 #include <linux/mdss_io_util.h>
-#include <linux/proc_fs.h>
 #include "gf_spi.h"
 #include <linux/unistd.h>
 #include <linux/delay.h>
@@ -70,8 +69,6 @@
 #define	CHRD_DRIVER_NAME	"goodix_fp_spi"
 #define	CLASS_NAME		    "goodix_fp"
 
-#define PROC_NAME  "hwinfo"
-
 #define N_SPI_MINORS		32	/* ... up to 256 */
 static int SPIDEV_MAJOR;
 
@@ -82,7 +79,6 @@ static struct wakeup_source fp_ws;
 static struct gf_dev gf;
 
 extern int fpsensor;
-static struct proc_dir_entry *proc_entry;
 
 struct gf_key_map maps[] = {
 	{ EV_KEY, KEY_HOME },
@@ -328,14 +324,8 @@ static irqreturn_t gf_irq(int irq, void *handle)
 {
 #if defined(GF_NETLINK_ENABLE)
 	char msg = GF_NET_EVENT_IRQ;
-	struct gf_dev *gf_dev = &gf;
 	__pm_wakeup_event(&fp_ws, WAKELOCK_HOLD_TIME);
 	sendnlmsg(&msg);
-	if (gf_dev->device_available == 1) {
-		printk("%s:shedule_work\n",__func__);
-		gf_dev->wait_finger_down = false;
-		schedule_work(&gf_dev->work);
-	}
 #elif defined(GF_FASYNC)
 	struct gf_dev *gf_dev = &gf;
 
@@ -543,12 +533,6 @@ static long gf_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long a
 }
 #endif /*CONFIG_COMPAT*/
 
- static void notification_work(struct work_struct *work)
-{
-	pr_debug("%s unblank\n", __func__);
-	dsi_bridge_interface_enable(FP_UNLOCK_REJECTION_TIMEOUT);
-}
-
 static int gf_open(struct inode *inode, struct file *filp)
 {
 	struct gf_dev *gf_dev = &gf;
@@ -594,19 +578,6 @@ err_irq:
 err_parse_dt:
 	mutex_unlock(&device_list_lock);
 	return status;
-}
-
-static int proc_show_ver(struct seq_file *file,void *v)
-{
-	seq_printf(file,"Fingerprint: Goodix\n");
-	return 0;
-}
-
-static int proc_open(struct inode *inode,struct file *file)
-{
-	printk("gf3258 proc_open\n");
-	single_open(file,proc_show_ver,NULL);
-	return 0;
 }
 
 #ifdef GF_FASYNC
@@ -662,13 +633,6 @@ static const struct file_operations gf_fops = {
 #endif
 };
 
-static const struct file_operations proc_file_ops = {
-	.owner = THIS_MODULE,
-	.open = proc_open,
-	.read = seq_read,
-	.release = single_release,
-};
-
 static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 		unsigned long val, void *data)
 {
@@ -685,7 +649,6 @@ static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 	if (evdata && evdata->data && val == MSM_DRM_EVENT_BLANK && gf_dev) {
 		blank = evdata->data;
 		if (gf_dev->device_available == 1 && *blank == MSM_DRM_BLANK_UNBLANK) {
-				gf_dev->fb_black = 0;
 #if defined(GF_NETLINK_ENABLE)
 				msg = GF_NET_EVENT_FB_UNBLACK;
 				sendnlmsg(&msg);
@@ -698,8 +661,6 @@ static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 	}else if(evdata && evdata->data && val == MSM_DRM_EARLY_EVENT_BLANK && gf_dev){
 		blank = evdata->data;
 			if (gf_dev->device_available == 1 && *blank == MSM_DRM_BLANK_POWERDOWN) {
-				gf_dev->fb_black = 1;
-				gf_dev->wait_finger_down = true;
 #if defined(GF_NETLINK_ENABLE)
 				msg = GF_NET_EVENT_FB_BLACK;
 				sendnlmsg(&msg);
@@ -740,9 +701,6 @@ static int gf_probe(struct platform_device *pdev)
 	gf_dev->reset_gpio = -EINVAL;
 	gf_dev->pwr_gpio = -EINVAL;
 	gf_dev->device_available = 0;
-	gf_dev->fb_black = 0;
-	gf_dev->wait_finger_down = false;
-	INIT_WORK(&gf_dev->work, notification_work);
 
 	/* If we can allocate a minor number, hook up this device.
 	 * Reusing minors is fine so long as udev or mdev is working.
@@ -808,14 +766,6 @@ static int gf_probe(struct platform_device *pdev)
 
 	wakeup_source_init(&fp_ws, "fp_ws");
 
-	proc_entry = proc_create(PROC_NAME, 0644, NULL, &proc_file_ops);
-	if (NULL == proc_entry) {
-		printk("gf3258 Couldn't create proc entry!");
-		return -ENOMEM;
-	} else {
-		printk("gf3258 Create proc entry success!");
-	}
-
 	pr_info("version V%d.%d.%02d\n", VER_MAJOR, VER_MINOR, PATCH_LEVEL);
 
 	return status;
@@ -863,7 +813,6 @@ static int gf_remove(struct platform_device *pdev)
 	list_del(&gf_dev->device_entry);
 	device_destroy(gf_class, gf_dev->devt);
 	clear_bit(MINOR(gf_dev->devt), minors);
-	remove_proc_entry(PROC_NAME,NULL);
 	mutex_unlock(&device_list_lock);
 
 	return 0;
