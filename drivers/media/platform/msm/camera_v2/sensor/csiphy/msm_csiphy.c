@@ -1,4 +1,5 @@
 /* Copyright (c) 2011-2019, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -56,7 +57,11 @@
 #define CSI_3PHASE_HW                               1
 #define MAX_DPHY_DATA_LN                            4
 #define CLOCK_OFFSET                              0x700
+#ifdef CONFIG_MACH_XIAOMI_F9S
+#define CSIPHY_SOF_DEBUG_COUNT                      5
+#else
 #define CSIPHY_SOF_DEBUG_COUNT                      2
+#endif
 #define MBPS                                      1000000
 #define SNPS_INTERPHY_OFFSET                      0x800
 #define SET_THE_BIT(x)                            (0x1 << x)
