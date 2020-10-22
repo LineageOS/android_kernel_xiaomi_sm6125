@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef __FTS_FLASH_H
-#define __FTS_FLASH_H
+#ifndef __FTS_F9S_FLASH_H
+#define __FTS_F9S_FLASH_H
 
 
 #include "ftsSoftware.h"

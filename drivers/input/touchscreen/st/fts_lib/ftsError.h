@@ -32,8 +32,8 @@
  **************************************************************************
  */
 
-#ifndef __FTS_ERROR_H
-#define __FTS_ERROR_H
+#ifndef __FTS_F9S_ERROR_H
+#define __FTS_F9S_ERROR_H
 
 
 //FIRST LEVEL ERROR CODE

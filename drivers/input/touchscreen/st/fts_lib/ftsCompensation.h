@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef __FTS_COMPENSATION_H
-#define __FTS_COMPENSATION_H
+#ifndef __FTS_F9S_COMPENSATION_H
+#define __FTS_F9S_COMPENSATION_H
 
 
 #include "ftsCrossCompile.h"

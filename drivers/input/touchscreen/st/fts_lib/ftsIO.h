@@ -32,8 +32,8 @@
  **************************************************************************
  */
 
-#ifndef __FTS_IO_H
-#define __FTS_IO_H
+#ifndef __FTS_F9S_IO_H
+#define __FTS_F9S_IO_H
 
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
