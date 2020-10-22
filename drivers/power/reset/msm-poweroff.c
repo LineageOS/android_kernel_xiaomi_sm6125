@@ -164,29 +164,7 @@ static bool get_dload_mode(void)
 
 static void enable_emergency_dload_mode(void)
 {
-	int ret;
-
-	if (emergency_dload_mode_addr) {
-		__raw_writel(EMERGENCY_DLOAD_MAGIC1,
-				emergency_dload_mode_addr);
-		__raw_writel(EMERGENCY_DLOAD_MAGIC2,
-				emergency_dload_mode_addr +
-				sizeof(unsigned int));
-		__raw_writel(EMERGENCY_DLOAD_MAGIC3,
-				emergency_dload_mode_addr +
-				(2 * sizeof(unsigned int)));
-
-		/* Need disable the pmic wdt, then the emergency dload mode
-		 * will not auto reset.
-		 */
-		qpnp_pon_wd_config(0);
-		/* Make sure all the cookied are flushed to memory */
-		mb();
-	}
-
-	ret = scm_set_dload_mode(SCM_EDLOAD_MODE, 0);
-	if (ret)
-		pr_err("Failed to set secure EDLOAD mode: %d\n", ret);
+	pr_err("Failed to set secure EDLOAD mode \n");
 }
 
 static int dload_set(const char *val, const struct kernel_param *kp)
@@ -300,12 +278,10 @@ static void msm_restart_prepare(const char *cmd)
 
 	if (qpnp_pon_check_hard_reset_stored()) {
 		/* Set warm reset as true when device is in dload mode */
-		if (get_dload_mode() ||
-			((cmd != NULL && cmd[0] != '\0') &&
-			!strcmp(cmd, "edl")))
+		if (get_dload_mode() || in_panic)
 			need_warm_reset = true;
 	} else {
-		need_warm_reset = (get_dload_mode() ||
+		need_warm_reset = (get_dload_mode() || in_panic ||
 				(cmd != NULL && cmd[0] != '\0'));
 	}
 

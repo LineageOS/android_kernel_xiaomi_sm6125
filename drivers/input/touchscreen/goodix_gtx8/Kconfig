@@ -1,0 +1,11 @@
+#
+# Goodix touchscreen driver configuration
+#
+menuconfig TOUCHSCREEN_GOODIX_F9S
+	bool "Goodix GTx8 touchscreen"
+	depends on ( SPI || TOUCHSCREEN_XIAOMI_F9S )
+	depends on I2C
+	default n
+	help
+	  Say Y here if you have a Goodix GTx5xx touchscreen connected
+	  to your system.
