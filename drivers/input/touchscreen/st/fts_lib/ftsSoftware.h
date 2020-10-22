@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef __FTS_SOFTWARE_H
-#define __FTS_SOFTWARE_H
+#ifndef __FTS_F9S_SOFTWARE_H
+#define __FTS_F9S_SOFTWARE_H
 
 #include <linux/types.h>
 

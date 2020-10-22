@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef __FTS_TOOL_H
-#define __FTS_TOOL_H
+#ifndef __FTS_F9S_TOOL_H
+#define __FTS_F9S_TOOL_H
 
 #define GPIO_NOT_DEFINED              -1
 #define TIMEOUT_RESOLUTION            10 //ms
