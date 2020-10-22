@@ -18,8 +18,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LINUX_FTS_I2C_H_
-#define _LINUX_FTS_I2C_H_
+#ifndef _LINUX_FTS_F9S_I2C_H_
+#define _LINUX_FTS_F9S_I2C_H_
 
 /*#include <linux/wakelock.h>*/
 #include <linux/pm_wakeup.h>

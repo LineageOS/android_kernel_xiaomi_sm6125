@@ -32,8 +32,8 @@
  **************************************************************************
  */
 
-#ifndef _FTS_GESTURE_H_
-#define _FTS_GESTURE_H_
+#ifndef _FTS_F9S_GESTURE_H_
+#define _FTS_F9S_GESTURE_H_
 
 #include "ftsHardware.h"
 
