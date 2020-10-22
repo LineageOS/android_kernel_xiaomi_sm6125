@@ -31,8 +31,8 @@
  **************************************************************************
  */
 
-#ifndef __FTS_HARDWARE_H
-#define __FTS_HARDWARE_H
+#ifndef __FTS_F9S_HARDWARE_H
+#define __FTS_F9S_HARDWARE_H
 
 //DUMMY BYTES DATA
 #define DUMMY_HW_REG                   1
