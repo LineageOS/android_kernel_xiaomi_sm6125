@@ -32,8 +32,8 @@
  **************************************************************************
  */
 
-#ifndef __FTS_FRAME_H
-#define __FTS_FRAME_H
+#ifndef __FTS_F9S_FRAME_H
+#define __FTS_F9S_FRAME_H
 
 #include "ftsSoftware.h"
 

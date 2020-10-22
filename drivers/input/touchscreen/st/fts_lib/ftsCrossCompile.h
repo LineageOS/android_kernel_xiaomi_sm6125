@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef __FTS_CROSS_COMPILE_H
-#define __FTS_CROSS_COMPILE_H
+#ifndef __FTS_F9S_CROSS_COMPILE_H
+#define __FTS_F9S_CROSS_COMPILE_H
 
 //#define NDK
 //#define DEBUG

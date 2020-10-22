@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef __FTS_TIME_H
-#define __FTS_TIME_H
+#ifndef __FTS_F9S_TIME_H
+#define __FTS_F9S_TIME_H
 
 #include <linux/time.h>
 

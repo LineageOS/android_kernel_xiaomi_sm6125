@@ -32,8 +32,8 @@
  **************************************************************************
  */
 
-#ifndef __FTS_TEST_H
-#define __FTS_TEST_H
+#ifndef __FTS_F9S_TEST_H
+#define __FTS_F9S_TEST_H
 
 #include "ftsSoftware.h"
 
