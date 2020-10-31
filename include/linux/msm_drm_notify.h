@@ -25,6 +25,10 @@ enum {
 	MSM_DRM_BLANK_UNBLANK,
 	/* panel: power off */
 	MSM_DRM_BLANK_POWERDOWN,
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	MSM_DRM_BLANK_LP1,
+	MSM_DRM_BLANK_LP2,
+#endif
 };
 
 enum msm_drm_display_id {
