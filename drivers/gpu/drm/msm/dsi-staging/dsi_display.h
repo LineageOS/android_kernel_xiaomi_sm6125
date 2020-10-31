@@ -29,9 +29,15 @@
 #include "dsi_phy.h"
 #include "dsi_panel.h"
 
-#define DSI_CLIENT_NAME_SIZE		20
-#define MAX_CMDLINE_PARAM_LEN	 512
-#define MAX_CMD_PAYLOAD_SIZE	256
+#ifdef CONFIG_MACH_XIAOMI_F9S
+#define MAX_DSI_CTRLS_PER_DISPLAY		2
+#define GPIO_READ_MAX_TIMES             3
+#endif
+
+#define DSI_CLIENT_NAME_SIZE            20
+#define MAX_CMDLINE_PARAM_LEN           512
+#define MAX_CMD_PAYLOAD_SIZE            256
+
 /*
  * DSI Validate Mode modifiers
  * @DSI_VALIDATE_FLAG_ALLOW_ADJUST:	Allow mode validation to also do fixup
@@ -240,6 +246,9 @@ struct dsi_display {
 	struct dsi_lane_map lane_map;
 	int cmdline_topology;
 	int cmdline_timing;
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	int esd_error_flag_gpio;
+#endif
 	bool is_tpg_enabled;
 	bool poms_pending;
 	bool ulps_enabled;
@@ -614,6 +623,11 @@ void dsi_display_enable_event(struct drm_connector *connector,
 int dsi_display_set_backlight(struct drm_connector *connector,
 		void *display, u32 bl_lvl);
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+int dsi_display_set_panel(struct drm_connector *connector,
+		void *display, int value);
+#endif
+
 /**
  * dsi_display_check_status() - check if panel is dead or alive
  * @connector:          Pointer to drm connector structure
@@ -622,6 +636,11 @@ int dsi_display_set_backlight(struct drm_connector *connector,
  */
 int dsi_display_check_status(struct drm_connector *connector, void *display,
 				bool te_check_override);
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+int dsi_display_check_white_status(struct drm_connector *connector, void *display,
+				bool te_check_override);
+#endif
 
 /**
  * dsi_display_cmd_transfer() - transfer command to the panel
@@ -711,5 +730,10 @@ int dsi_display_cont_splash_config(void *display);
  */
 int dsi_display_get_panel_vfp(void *display,
 	int h_active, int v_active);
+#ifdef CONFIG_MACH_XIAOMI_F9S
+int dsi_lowpower_register_client(struct notifier_block *nb);
+
+int dsi_display_param_store(struct dsi_display *display, uint32_t param);
+#endif
 
 #endif /* _DSI_DISPLAY_H_ */
