@@ -150,6 +150,7 @@ enum esd_check_status_mode {
 	ESD_MODE_REG_READ,
 	ESD_MODE_SW_BTA,
 	ESD_MODE_PANEL_TE,
+	ESD_MODE_PANEL_ERROR_FLAG,
 	ESD_MODE_SW_SIM_SUCCESS,
 	ESD_MODE_SW_SIM_FAILURE,
 	ESD_MODE_MAX
@@ -157,6 +158,7 @@ enum esd_check_status_mode {
 
 struct drm_panel_esd_config {
 	bool esd_enabled;
+	bool acl_white_enabled;
 
 	enum esd_check_status_mode status_mode;
 	struct dsi_panel_cmd_set status_cmd;
@@ -166,6 +168,11 @@ struct drm_panel_esd_config {
 	u8 *return_buf;
 	u8 *status_buf;
 	u32 groups;
+};
+
+struct white_point {
+	int point_x;
+	int point_y;
 };
 
 struct dsi_panel {
@@ -203,6 +210,18 @@ struct dsi_panel {
 	struct dsi_parser_utils utils;
 
 	bool lp11_init;
+
+	bool sansumg_flag;
+	bool last_acl_flag;
+
+	u32 last_bl_lvl;
+	u32 aod_last_bl_lvl;
+	bool fod_hbm_enabled;
+	bool fod_backlight_flag;
+	bool dimming_enabled;
+	bool skip_dimming_on;
+
+	struct white_point point_read;
 	bool ulps_feature_enabled;
 	bool ulps_suspend_enabled;
 	bool allow_phy_power_off;
@@ -296,6 +315,8 @@ int dsi_panel_post_enable(struct dsi_panel *panel);
 
 int dsi_panel_pre_disable(struct dsi_panel *panel);
 
+int dsi_panel_write_panel_register(struct dsi_panel *panel,int value);
+
 int dsi_panel_disable(struct dsi_panel *panel);
 
 int dsi_panel_unprepare(struct dsi_panel *panel);
@@ -303,6 +324,12 @@ int dsi_panel_unprepare(struct dsi_panel *panel);
 int dsi_panel_post_unprepare(struct dsi_panel *panel);
 
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl);
+
+int dsi_panel_set_doze_backlight(struct dsi_panel *panel, u32 bl_lvl);
+
+int dsi_panel_set_dimming_brightness(struct dsi_panel *panel, u8 dimming, u32 brightness);
+
+int dsi_panel_set_brightness(struct dsi_panel *panel, u8 dimming, u32 brightness);
 
 int dsi_panel_update_pps(struct dsi_panel *panel);
 
