@@ -34,6 +34,9 @@
 #include <linux/slab.h>
 
 #include <video/mipi_display.h>
+#ifdef CONFIG_MACH_XIAOMI_F9S
+#include "dsi_panel.h"
+#endif
 
 /**
  * DOC: dsi helpers

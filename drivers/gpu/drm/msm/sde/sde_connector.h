@@ -169,6 +169,11 @@ struct sde_connector_ops {
 	int (*set_backlight)(struct drm_connector *connector,
 			void *display, u32 bl_lvl);
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	int (*set_panel_register)(struct drm_connector *connector,
+				void *display, int value);
+#endif
+
 	/**
 	 * soft_reset - perform a soft reset on the connector
 	 * @display: Pointer to private display structure
@@ -244,6 +249,11 @@ struct sde_connector_ops {
 	 */
 	int (*check_status)(struct drm_connector *connector, void *display,
 					bool te_check_override);
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	int (*check_white_status)(struct drm_connector *connector, void *display,
+						bool te_check_override);
+#endif
 
 	/**
 	 * cmd_transfer - Transfer command to the connected display panel
