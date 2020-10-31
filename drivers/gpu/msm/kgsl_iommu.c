@@ -1566,7 +1566,12 @@ static int kgsl_iommu_init(struct kgsl_mmu *mmu)
 	struct kgsl_device *device = KGSL_MMU_DEVICE(mmu);
 	struct kgsl_iommu *iommu = _IOMMU_PRIV(mmu);
 	struct kgsl_iommu_context *ctx = &iommu->ctx[KGSL_IOMMU_CONTEXT_USER];
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	struct kgsl_pwrctrl *pwr = &device->pwrctrl;
+	int status, i;
+#else
 	int status;
+#endif
 
 	mmu->features |= KGSL_MMU_PAGED;
 
@@ -1594,6 +1599,21 @@ static int kgsl_iommu_init(struct kgsl_mmu *mmu)
 	/* Check to see if we need to do the IOMMU sync dance */
 	need_iommu_sync = of_property_read_bool(device->pdev->dev.of_node,
 		"qcom,gpu-quirk-iommu-sync");
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	/*
+	 * Try to preserve the SMMU regulator if HW can support
+	 * unmap fast path.
+	 */
+	if (MMU_FEATURE(mmu, KGSL_MMU_UNMAP_FAST)) {
+		for (i = 0; i < KGSL_MAX_REGULATORS; i++) {
+			if (!strcmp(pwr->regulators[i].name, "vddcx")) {
+				iommu->vddcx_regulator =
+					pwr->regulators[i].reg;
+			}
+		}
+	}
+#endif
 
 	iommu->regbase = ioremap(iommu->regstart, iommu->regsize);
 	if (iommu->regbase == NULL) {
@@ -2741,6 +2761,9 @@ static const struct {
 	{ "qcom,global_pt", KGSL_MMU_GLOBAL_PAGETABLE },
 	{ "qcom,hyp_secure_alloc", KGSL_MMU_HYP_SECURE_ALLOC },
 	{ "qcom,force-32bit", KGSL_MMU_FORCE_32BIT },
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	{ "qcom,unmap_fast", KGSL_MMU_UNMAP_FAST },
+#endif
 };
 
 static int _kgsl_iommu_probe(struct kgsl_device *device,
