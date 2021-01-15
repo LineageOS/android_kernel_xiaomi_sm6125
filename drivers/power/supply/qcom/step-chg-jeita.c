@@ -1,4 +1,5 @@
 /* Copyright (c) 2017-2019 The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -229,6 +230,9 @@ clean:
 }
 EXPORT_SYMBOL(read_range_data_from_node);
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+const char *BATTERY_DEFAULT= "S88512_mtp_default_battery_4V4_4040mAh";
+#endif
 static int get_step_chg_jeita_setting_from_profile(struct step_chg_info *chip)
 {
 	struct device_node *batt_node, *profile_node;
@@ -268,8 +272,14 @@ static int get_step_chg_jeita_setting_from_profile(struct step_chg_info *chip)
 		return PTR_ERR(profile_node);
 
 	if (!profile_node) {
+#ifdef CONFIG_MACH_XIAOMI_F9S
+		pr_err("Couldn't find profile, default battery profile was set\n");
+		profile_node = of_batterydata_get_best_profile(batt_node,
+			batt_id_ohms / 1000, BATTERY_DEFAULT);
+#else
 		pr_err("Couldn't find profile\n");
 		return -ENODATA;
+#endif
 	}
 
 	rc = of_property_read_string(profile_node, "qcom,battery-type",
@@ -349,7 +359,9 @@ static int get_step_chg_jeita_setting_from_profile(struct step_chg_info *chip)
 					rc);
 		chip->sw_jeita_cfg_valid = false;
 	}
-
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	chip->sw_jeita_cfg_valid = true;
+#endif
 	rc = read_range_data_from_node(profile_node,
 			"qcom,jeita-fv-ranges",
 			chip->jeita_fv_config->fv_cfg,
@@ -620,6 +632,9 @@ static int handle_jeita(struct step_chg_info *chip)
 	union power_supply_propval pval = {0, };
 	int rc = 0, fcc_ua = 0, fv_uv = 0;
 	u64 elapsed_us;
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	static int last_fv_uv = -22;
+#endif
 
 	rc = power_supply_get_property(chip->batt_psy,
 		POWER_SUPPLY_PROP_SW_JEITA_ENABLED, &pval);
@@ -710,14 +725,32 @@ static int handle_jeita(struct step_chg_info *chip)
 	if (chip->jeita_arb_en && fv_uv > 0) {
 		rc = power_supply_get_property(chip->batt_psy,
 				POWER_SUPPLY_PROP_VOLTAGE_NOW, &pval);
+#ifdef CONFIG_MACH_XIAOMI_F9S
+		if (!rc && (pval.intval > (fv_uv + JEITA_SUSPEND_HYST_UV )))
+			vote(chip->usb_icl_votable, JEITA_VOTER, true, 0);
+#else
 		if (!rc && (pval.intval > fv_uv))
 			vote(chip->usb_icl_votable, JEITA_VOTER, true, 0);
+#endif
 		else if (pval.intval < (fv_uv - JEITA_SUSPEND_HYST_UV))
 			vote(chip->usb_icl_votable, JEITA_VOTER, false, 0);
 	}
 
 set_jeita_fv:
 	vote(chip->fv_votable, JEITA_VOTER, fv_uv ? true : false, fv_uv);
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	if((last_fv_uv == 4100000) && (fv_uv == 4400000)){
+		pr_err("WT force recharge for jeita\n");
+		pval.intval = 1;
+		rc = power_supply_set_property(chip->batt_psy,
+			POWER_SUPPLY_PROP_FORCE_RECHARGE, &pval);
+		if (rc < 0)
+			pr_err("Failed to force recharge rc=%d\n", rc);
+	}
+	if (last_fv_uv != fv_uv)
+		last_fv_uv = fv_uv;
+#endif
 
 update_time:
 	chip->jeita_last_update_time = ktime_get();
