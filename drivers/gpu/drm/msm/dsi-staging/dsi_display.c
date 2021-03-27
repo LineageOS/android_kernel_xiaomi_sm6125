@@ -20,6 +20,7 @@
 #include <linux/err.h>
 
 #include <linux/msm_drm_notify.h>
+#include <linux/kernfs.h>
 
 #include "msm_drv.h"
 #include "sde_connector.h"
@@ -67,6 +68,8 @@ static const struct of_device_id dsi_display_dt_match[] = {
 };
 
 struct dsi_display *primary_display;
+
+static struct kernfs_node *dsi_link;
 
 static void dsi_display_mask_ctrl_error_interrupts(struct dsi_display *display,
 			u32 mask, bool enable)
@@ -5535,6 +5538,23 @@ static int dsi_display_sysfs_init(struct dsi_display *display)
 {
 	int rc = 0;
 	struct device *dev = &display->pdev->dev;
+	struct device *soc_dev = dev->parent;
+
+	if (!soc_dev)
+		pr_err("[%s] unable to determine parent device\n", display->name);
+	else {
+		struct kobject *dsi_kobj = &dev->kobj;
+		struct kernfs_node *dsi_node = dsi_kobj->sd;
+
+		kernfs_get(dsi_node);
+
+		dsi_link = kernfs_create_link(soc_dev->kobj.sd, "soc:qcom,dsi-display-primary",
+					      dsi_node);
+		if (IS_ERR_OR_NULL(dsi_link))
+			pr_err("[%s] unable to create dsi-display symlink\n", display->name);
+
+		kernfs_put(dsi_node);
+	}
 
 	rc = sysfs_create_group(&dev->kobj, &display_fs_attrs_group);
 	if (rc) {
@@ -5574,6 +5594,9 @@ static int dsi_display_sysfs_deinit(struct dsi_display *display)
 			&dynamic_dsi_clock_fs_attrs_group);
 
 	sysfs_remove_group(&dev->kobj, &display_fs_attrs_group);
+
+	if (!IS_ERR_OR_NULL(dsi_link))
+		kernfs_remove_by_name(dsi_link->parent, dsi_link->name);
 
 	return 0;
 
