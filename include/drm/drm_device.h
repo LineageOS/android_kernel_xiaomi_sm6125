@@ -211,6 +211,9 @@ struct drm_device {
 	int sde_power_mode;
 	int pre_sde_power_mode;
 #endif
+#ifdef CONFIG_MACH_XIAOMI_C3J
+	int doze_state;
+#endif
 };
 
 #endif
