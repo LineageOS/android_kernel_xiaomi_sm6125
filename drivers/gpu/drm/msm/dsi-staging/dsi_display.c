@@ -5537,15 +5537,32 @@ static int dsi_display_sysfs_init(struct dsi_display *display)
 	struct device *dev = &display->pdev->dev;
 
 	rc = sysfs_create_group(&dev->kobj, &display_fs_attrs_group);
-	if (rc)
-		pr_err("failed to create display device attributes");
+	if (rc) {
+		pr_err("[%s] failed to create display device attributes\n",
+		       display->name);
+
+		return rc;
+	}
 
 	if (display->panel->panel_mode == DSI_OP_CMD_MODE)
 		rc = sysfs_create_group(&dev->kobj,
 			&dynamic_dsi_clock_fs_attrs_group);
 
-	return rc;
+	if (rc) {
+		pr_err("[%s] failed to create display device attributes\n",
+		       display->name);
+		goto err_dyn_dsi_attr;
+	}
 
+	pr_debug("[%s] dsi_display_sysfs_init:%d,panel mode:%d\n",
+		display->name, rc, display->panel->panel_mode);	
+
+	return 0;
+
+err_dyn_dsi_attr:
+	sysfs_remove_group(&dev->kobj, &display_fs_attrs_group);
+
+	return rc;
 }
 
 static int dsi_display_sysfs_deinit(struct dsi_display *display)
@@ -5555,6 +5572,8 @@ static int dsi_display_sysfs_deinit(struct dsi_display *display)
 	if (display->panel->panel_mode == DSI_OP_CMD_MODE)
 		sysfs_remove_group(&dev->kobj,
 			&dynamic_dsi_clock_fs_attrs_group);
+
+	sysfs_remove_group(&dev->kobj, &display_fs_attrs_group);
 
 	return 0;
 
