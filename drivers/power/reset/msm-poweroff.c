@@ -66,7 +66,11 @@ static void scm_disable_sdi(void);
  * There is no API from TZ to re-enable the registers.
  * So the SDI cannot be re-enabled when it already by-passed.
  */
+#ifdef CONFIG_DISABLE_DOWNLOAD
+static int download_mode = 0;
+#else
 static int download_mode = 1;
+#endif
 static bool force_warm_reboot;
 
 #ifdef CONFIG_QCOM_DLOAD_MODE
@@ -174,10 +178,12 @@ static int dload_set(const char *val, const struct kernel_param *kp)
 
 	int old_val = download_mode;
 
+#ifndef CONFIG_MACH_XIAOMI_C3J
 	if (!download_mode) {
 		pr_err("Error: SDI dynamic enablement is not supported\n");
 		return -EINVAL;
 	}
+#endif
 
 	ret = param_set_int(val, kp);
 
@@ -290,10 +296,20 @@ static void msm_restart_prepare(const char *cmd)
 		pr_info("Forcing a warm reset of the system\n");
 
 	/* Hard reset the PMIC unless memory contents must be maintained. */
+#ifdef CONFIG_MACH_XIAOMI_C3J
+	if (force_warm_reboot || need_warm_reset || in_panic) {
+		pr_info("a warm reset of the system with in_panic %d or need_warm_reset %d\n",
+			in_panic, need_warm_reset);
+		qpnp_pon_system_pwr_off(PON_POWER_OFF_WARM_RESET);
+	} else {
+		qpnp_pon_system_pwr_off(PON_POWER_OFF_HARD_RESET);
+	}
+#else
 	if (force_warm_reboot || need_warm_reset)
 		qpnp_pon_system_pwr_off(PON_POWER_OFF_WARM_RESET);
 	else
 		qpnp_pon_system_pwr_off(PON_POWER_OFF_HARD_RESET);
+#endif
 
 	if (in_panic) {
 		qpnp_pon_set_restart_reason(PON_RESTART_REASON_PANIC);
@@ -334,7 +350,15 @@ static void msm_restart_prepare(const char *cmd)
 				__raw_writel(0x6f656d00 | (code & 0xff),
 					     restart_reason);
 		} else if (!strncmp(cmd, "edl", 3)) {
+#ifdef CONFIG_MACH_XIAOMI_C3J
+			if (0) {
+				enable_emergency_dload_mode();
+			} else {
+				pr_notice("This command already been disabled\n");
+			}
+#else
 			enable_emergency_dload_mode();
+#endif
 		} else {
 			qpnp_pon_set_restart_reason(PON_RESTART_REASON_NORMAL);
 			__raw_writel(0x77665501, restart_reason);
