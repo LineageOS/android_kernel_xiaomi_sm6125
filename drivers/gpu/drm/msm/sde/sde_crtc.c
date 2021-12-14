@@ -5462,13 +5462,37 @@ static int sde_crtc_global_dim_atomic_check(struct sde_crtc_state *cstate,
 					    struct plane_state *pstates,
 					    int cnt)
 {
+	enum msm_dim_layer_type type;
 	u32 alpha, stage = 0;
 	int i, rc = 0;
 
 	cstate->global_dim_layer = NULL;
 	cstate->global_dim_layer_type = MSM_DIM_LAYER_NONE;
 
-	rc = sde_crtc_get_dim_layer_alpha(cstate, MSM_DIM_LAYER_TOP, &alpha);
+	/* First look for FOD layer if it is provided by userspace.
+	 * If so use its stage value to inject global dimming layer
+	 * at this stage so it will dim only layers below FOD layer.
+	 * FOD and all above layers will not be dimmed.
+	 */
+	for (i = 0; i < cnt; i++)
+		if (sde_plane_is_fod_layer(pstates[i].drm_pstate))
+			break;
+
+	if (i < cnt) {
+		type = MSM_DIM_LAYER_FOD;
+		/* Get alpha value for FOD dim layer type */
+		rc = sde_crtc_get_dim_layer_alpha(cstate, type, &alpha);
+		/* Save FOD layer stage */
+		stage = pstates[i].stage;
+	}
+
+	/* If FOD layer is not provided by userspace or FOD dim layer type is
+	 * not supported or disabled try to get alpha for TOP dim layer type */
+	if (rc <= 0) {
+		type = MSM_DIM_LAYER_TOP;
+		rc = sde_crtc_get_dim_layer_alpha(cstate, type, &alpha);
+	}
+
 	switch (rc) {
 	case 1:
 		break;
@@ -5483,21 +5507,32 @@ static int sde_crtc_global_dim_atomic_check(struct sde_crtc_state *cstate,
 		return rc;
 	}
 
-	cstate->global_dim_layer_type = MSM_DIM_LAYER_TOP;
+	if (type == MSM_DIM_LAYER_TOP) {
+		/* For TOP dim layer type look for top-most stage */
+		for (i = 0; i < cnt; i++)
+			if (pstates[i].stage > stage)
+				stage = pstates[i].stage;
 
-	/* Look for top-most stage */
-	for (i = 0; i < cnt; i++)
-		if (pstates[i].stage > stage)
-			stage = pstates[i].stage;
-
-	/* Dimming layer sits on top */
-	stage++;
+		/* Dimming layer sits on top */
+		stage++;
+	}
 
 	rc = _sde_crtc_setup_global_dim_layer(cstate, stage, alpha);
 	if (rc) {
 		SDE_ERROR("Failed to setup global dimming layer\n");
-		cstate->global_dim_layer_type = MSM_DIM_LAYER_NONE;
+		return rc;
 	}
+
+	if (type == MSM_DIM_LAYER_FOD) {
+		/* For FOD dim layer type we have to adjust stage of FOD layer
+		 * and of all layers above it
+		 */
+		for (i = 0; i < cnt; i++)
+			if (pstates[i].stage >= stage)
+				pstates[i].stage++;
+	}
+
+	cstate->global_dim_layer_type = type;
 
 	return rc;
 }
