@@ -288,10 +288,12 @@ enum msm_event_wait {
  * enum msm_dim_layer_type - global dimming layer types
  * @MSM_DIM_LAYER_NONE:	None (used to indicate there is no dimming active)
  * @MSM_DIM_LAYER_TOP:	Top-most layer for global attentuation
+ * @MSM_DIM_LAYER_FOD:	Dimming layer to avoid FOD flickering
  */
 enum msm_dim_layer_type {
 	MSM_DIM_LAYER_NONE,
 	MSM_DIM_LAYER_TOP,
+	MSM_DIM_LAYER_FOD,
 };
 #endif
 
