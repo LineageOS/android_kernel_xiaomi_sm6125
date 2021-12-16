@@ -240,6 +240,7 @@ struct dsi_panel {
 	char dsc_pps_cmd[DSI_CMD_PPS_SIZE];
 	enum dsi_dms_mode dms_mode;
 
+	bool hbm_enabled;
 	bool sync_broadcast_en;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
@@ -377,5 +378,18 @@ void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status);
 
 u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel);
+
+static inline bool dsi_panel_is_hbm_enabled(struct dsi_panel *panel)
+{
+	bool status;
+
+	dsi_panel_acquire_panel_lock(panel);
+	status = panel->hbm_enabled;
+	dsi_panel_release_panel_lock(panel);
+
+	return status;
+}
+
+int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status);
 
 #endif /* _DSI_PANEL_H_ */
