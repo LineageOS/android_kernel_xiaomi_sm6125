@@ -939,6 +939,13 @@ static int __dsi_panel_send(struct dsi_panel *panel, enum dsi_cmd_set_type type,
 	__dsi_panel_send(PANEL, __PASTE(DSI_CMD_SET_,CMDSET),		\
 			 __stringify(CMDSET))
 
+static int dsi_panel_set_hbm(struct dsi_panel *panel, bool enabled)
+{
+	return enabled ?
+		DSI_PANEL_SEND(panel, DISP_HBM_FOD_ON) :
+		DSI_PANEL_SEND(panel, DISP_HBM_FOD_OFF);
+}
+
 static u32 dsi_panel_get_backlight(struct dsi_panel *panel)
 {
 	return panel->bl_config.bl_level;
@@ -1066,6 +1073,10 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 	u32 brightness = dsi_panel_get_backlight(panel);
 	int i;
 
+	/* No dimming is required if HBM mode is enabled */
+	if (panel->hbm_enabled)
+		return 0;
+
 	if (!panel->fod_dim_lut)
 		return 0;
 
@@ -1086,12 +1097,30 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
 {
+	/* If HBM is enabled by user do nothing */
+	if (panel->hbm_enabled)
+		return 0;
+
+	return dsi_panel_set_hbm(panel, status);
+}
+
+int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status)
+{
 	int rc = 0;
 
-	if (status)
-		rc = DSI_PANEL_SEND(panel, DISP_HBM_FOD_ON);
-	else
-		rc = DSI_PANEL_SEND(panel, DISP_HBM_FOD_OFF);
+	if (!panel)
+		return -EINVAL;
+
+	dsi_panel_acquire_panel_lock(panel);
+
+	if (panel->hbm_enabled != status) {
+		panel->hbm_enabled = status;
+
+		if (dsi_panel_initialized(panel))
+			rc = dsi_panel_set_hbm(panel, status);
+	}
+
+	dsi_panel_release_panel_lock(panel);
 
 	return rc;
 }
@@ -4595,6 +4624,17 @@ int dsi_panel_set_nolp(struct dsi_panel *panel)
 	if (rc)
 		pr_err("[%s] failed to send DSI_CMD_SET_NOLP cmd, rc=%d\n",
 		       panel->name, rc);
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	/* Restore HBM mode when it is enabled by user */
+	if (panel->hbm_enabled) {
+		rc = dsi_panel_set_hbm(panel, true);
+		if (rc)
+			pr_err("[%s] unable to restore HBM mode, rc=%d\n",
+			       panel->name, rc);
+	}
+#endif
+
 exit:
 	mutex_unlock(&panel->panel_lock);
 	return rc;
@@ -4960,6 +5000,10 @@ int dsi_panel_enable(struct dsi_panel *panel)
 		       panel->name, rc);
 	}
 	panel->panel_initialized = true;
+
+	/* Restore HBM mode if enabled by user */
+	if (panel->hbm_enabled)
+		dsi_panel_set_hbm(panel, panel->hbm_enabled);
 
 	panel->fod_hbm_enabled = false;
 	panel->fod_backlight_flag = false;
