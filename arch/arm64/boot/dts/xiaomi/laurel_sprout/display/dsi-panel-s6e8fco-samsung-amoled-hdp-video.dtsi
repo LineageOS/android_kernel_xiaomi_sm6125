@@ -203,20 +203,13 @@
 				  15 01 00 00 00 00 02 53 28
 				];
 				qcom,mdss-dsi-dispparam-hbm-fod-on-command = [
-				  15 01 00 00 00 00 02 53 E0
-				  39 01 00 00 00 00 03 51 07 FF
-				];
+					15 01 00 00 10 00 02 53 E0];
 				qcom,mdss-dsi-dispparam-hbm-fod-off-command = [
-				  15 01 00 00 00 00 02 53 20
-				];
+					15 01 00 00 10 00 02 53 20];
 				qcom,mdss-dsi-dispparam-hbm-fod-off-doze-lbm-on-command = [
-				  15 01 00 00 00 00 02 53 20
-				  39 01 00 00 00 00 03 51 00 0F
-				];
+					15 01 00 00 10 00 02 53 23];
 				qcom,mdss-dsi-dispparam-hbm-fod-off-doze-hbm-on-command = [
-				  15 01 00 00 00 00 02 53 20
-				  39 01 00 00 00 00 03 51 00 BE
-				];
+					15 01 00 00 10 00 02 53 22];
 
 				qcom,mdss-dsi-post-on-command-state = "dsi_hs_mode";
 
@@ -230,8 +223,8 @@
 				qcom,mdss-dsi-acl-off-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-on-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-hbm-fod-on-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-hbm-fod-off-command-state = "dsi_hs_mode";
+				qcom,mdss-dsi-dispparam-hbm-fod-on-command-state = "dsi_lp_mode";
+				qcom,mdss-dsi-dispparam-hbm-fod-off-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-dispparam-hbm-fod-off-doze-lbm-on-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-dispparam-hbm-fod-off-doze-hbm-on-command-state = "dsi_hs_mode";
 			};
