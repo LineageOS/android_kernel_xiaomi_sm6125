@@ -559,6 +559,7 @@ struct msm_display_kickoff_params {
 	struct msm_roi_list *rois;
 	struct drm_msm_ext_hdr_metadata *hdr_meta;
 	enum msm_dim_layer_type dim_layer_type;
+	u32 dim_layer_alpha;
 };
 
 /**

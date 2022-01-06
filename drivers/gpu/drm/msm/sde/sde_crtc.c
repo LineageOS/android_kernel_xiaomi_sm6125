@@ -5345,6 +5345,7 @@ static int _sde_crtc_setup_global_dim_layer(struct sde_crtc_state *cstate,
 	dim_layer->color_fill = (struct sde_mdss_color){0, 0, 0, alpha};
 
 	cstate->global_dim_layer = dim_layer;
+	cstate->global_dim_layer_alpha = alpha;
 
 	return 0;
 }
@@ -5375,6 +5376,7 @@ static int sde_crtc_global_dim_atomic_check(struct sde_crtc_state *cstate,
 
 	cstate->global_dim_layer = NULL;
 	cstate->global_dim_layer_type = MSM_DIM_LAYER_NONE;
+	cstate->global_dim_layer_alpha = 0;
 
 	/* First look for FOD layer if it is provided by userspace.
 	 * If so use its stage value to inject global dimming layer

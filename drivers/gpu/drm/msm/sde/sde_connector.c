@@ -619,6 +619,7 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 	params.rois = &c_state->rois;
 	params.hdr_meta = &c_state->hdr_meta;
 	params.dim_layer_type = crtc_state->global_dim_layer_type;
+	params.dim_layer_alpha = crtc_state->global_dim_layer_alpha;
 
 	SDE_EVT32_VERBOSE(connector->base.id);
 
