@@ -248,6 +248,9 @@ struct dsi_panel {
 	char dsc_pps_cmd[DSI_CMD_PPS_SIZE];
 	enum dsi_dms_mode dms_mode;
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	bool doze_status;
+#endif
 	bool hbm_enabled;
 	bool sync_broadcast_en;
 	int power_mode;
