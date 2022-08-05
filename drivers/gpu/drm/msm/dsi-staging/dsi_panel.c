@@ -938,8 +938,10 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 	u32 brightness = dsi_panel_get_backlight(panel);
 	int i;
 
-	/* No dimming is required if HBM mode is enabled */
-	if (panel->hbm_enabled)
+	/* No dimming is required if HBM mode is enabled and device
+	 * is not in doze mode.
+	 */
+	if (panel->hbm_enabled && !panel->doze_status)
 		return 0;
 
 	if (!panel->fod_dim_lut)
@@ -962,11 +964,35 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
 {
-	/* If HBM is enabled by user do nothing */
-	if (panel->hbm_enabled)
-		return 0;
+	int rc = 0;
 
-	return dsi_panel_set_hbm(panel, status);
+	if (status) {
+		/* Switch to HBM mode if:
+		 * - it is not already enabled by user
+		 * - we're coming from doze mode
+		 */
+		if (!panel->hbm_enabled || panel->doze_status)
+			rc = dsi_panel_set_hbm(panel, true);
+	} else {
+		if (!panel->doze_status) {
+			/* Switching back to normal mode */
+
+			/* Switch-off HBM mode if it is not enabled by user */
+			if (!panel->hbm_enabled)
+				rc = dsi_panel_set_hbm(panel, false);
+
+			return rc;
+		}
+		/* Switching back to doze mode */
+		if (panel->hbm_enabled)
+			rc = DSI_PANEL_SEND(panel,
+					    DISP_HBM_FOD_OFF_DOZE_HBM_ON);
+		else
+			rc = DSI_PANEL_SEND(panel,
+					    DISP_HBM_FOD_OFF_DOZE_LBM_ON);
+	}
+
+	return rc;
 }
 
 int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status)
@@ -1991,6 +2017,8 @@ const char *cmd_set_prop_map[DSI_CMD_SET_MAX] = {
 	"qcom,mdss-dsi-dispparam-hbm-fod-off-doze-lbm-on-command",
 	"qcom,mdss-dsi-dispparam-hbm-fod-on-command",
 	"qcom,mdss-dsi-dispparam-hbm-fod-off-command",
+	"qcom,mdss-dsi-doze-hbm-command",
+	"qcom,mdss-dsi-doze-lbm-command",
 };
 
 const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
@@ -2031,6 +2059,8 @@ const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
 	"qcom,mdss-dsi-dispparam-hbm-fod-off-doze-lbm-on-command-state",
 	"qcom,mdss-dsi-dispparam-hbm-fod-on-command-state",
 	"qcom,mdss-dsi-dispparam-hbm-fod-off-command-state",
+	"qcom,mdss-dsi-doze-hbm-command-state",
+	"qcom,mdss-dsi-doze-lbm-command-state",
 };
 
 static int dsi_panel_get_cmd_pkt_count(const char *data, u32 length, u32 *cnt)
@@ -3699,6 +3729,7 @@ struct dsi_panel *dsi_panel_get(struct device *parent,
 		return ERR_PTR(-ENOMEM);
 
 	panel->panel_of_node = of_node;
+	panel->doze_status = false;
 	panel->parent = parent;
 	panel->type = type;
 
@@ -3799,6 +3830,8 @@ struct dsi_panel *dsi_panel_get(struct device *parent,
 		pr_debug("failed to parse white point config, rc=%d\n", rc);
 
 	panel->power_mode = SDE_MODE_DPMS_OFF;
+	panel->doze_status = false;
+
 	drm_panel_init(&panel->drm_panel);
 
 	panel->fod_hbm_enabled = false;
@@ -4287,6 +4320,17 @@ error:
 	return rc;
 }
 
+int dsi_panel_enable_doze(struct dsi_panel *panel)
+{
+	/* Select doze mode according HBM state */
+	if (panel->hbm_enabled)
+		/* HBM enabled -> use HBM doze mode */
+		return DSI_PANEL_SEND(panel, DOZE_HBM);
+
+	/* HBM disabled -> use normal doze mode */
+	return DSI_PANEL_SEND(panel, DOZE_LBM);
+}
+
 int dsi_panel_set_lp1(struct dsi_panel *panel)
 {
 	int rc = 0;
@@ -4316,6 +4360,11 @@ int dsi_panel_set_lp1(struct dsi_panel *panel)
 	if (rc)
 		pr_err("[%s] failed to send DSI_CMD_SET_LP1 cmd, rc=%d\n",
 			panel->name, rc);
+
+	rc = dsi_panel_enable_doze(panel);
+	if (rc)
+		pr_err("[%s] unable to enable doze mode, rc=%d\n",
+		       panel->name, rc);
 
 	if (panel->fod_hbm_enabled || panel->fod_backlight_flag) {
 		pr_info("skip doze backlight,[hbm=%d][fod_bl=%d]\n",
@@ -4347,6 +4396,12 @@ int dsi_panel_set_lp2(struct dsi_panel *panel)
 	if (rc)
 		pr_err("[%s] failed to send DSI_CMD_SET_LP2 cmd, rc=%d\n",
 		       panel->name, rc);
+
+	rc = dsi_panel_enable_doze(panel);
+	if (rc)
+		pr_err("[%s] unable to enable doze mode, rc=%d\n",
+		       panel->name, rc);
+
 exit:
 	mutex_unlock(&panel->panel_lock);
 	return rc;
@@ -4854,6 +4909,7 @@ int dsi_panel_disable(struct dsi_panel *panel)
 		}
 	}
 	panel->panel_initialized = false;
+	panel->doze_status = false;
 	panel->fod_hbm_enabled = false;
 	panel->fod_backlight_flag = false;
 	panel->dimming_enabled = false;

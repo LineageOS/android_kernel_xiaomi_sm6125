@@ -240,6 +240,7 @@ struct dsi_panel {
 	char dsc_pps_cmd[DSI_CMD_PPS_SIZE];
 	enum dsi_dms_mode dms_mode;
 
+	bool doze_status;
 	bool hbm_enabled;
 	bool sync_broadcast_en;
 	int power_mode;
