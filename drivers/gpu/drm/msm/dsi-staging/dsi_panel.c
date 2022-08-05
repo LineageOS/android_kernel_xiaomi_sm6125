@@ -922,6 +922,23 @@ static int dsi_panel_update_backlight_external(struct dsi_panel *panel, u32 bl_l
 }
 #endif
 #ifdef CONFIG_MACH_XIAOMI_F9S
+
+static int __dsi_panel_send(struct dsi_panel *panel, enum dsi_cmd_set_type type,
+			    const char *name)
+{
+	int rc;
+
+	rc = dsi_panel_tx_cmd_set(panel, type);
+	if (rc)
+		pr_err("Failed to send %s cmd, rc=%d\n", name, rc);
+
+	return rc;
+}
+
+#define DSI_PANEL_SEND(PANEL, CMDSET)					\
+	__dsi_panel_send(PANEL, __PASTE(DSI_CMD_SET_,CMDSET),		\
+			 __stringify(CMDSET))
+
 static u32 dsi_panel_get_backlight(struct dsi_panel *panel)
 {
 	return panel->bl_config.bl_level;
@@ -1071,17 +1088,10 @@ int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
 {
 	int rc = 0;
 
-	if (status) {
-		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_HBM_FOD_ON);
-		if (rc)
-			pr_err("[%s] failed to send DSI_CMD_SET_DISP_HBM_FOD_ON cmd, rc=%d\n",
-					panel->name, rc);
-	} else {
-		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_HBM_FOD_OFF);
-		if (rc)
-			pr_err("[%s] failed to send DSI_CMD_SET_DISP_HBM_FOD_OFF cmd, rc=%d\n",
-					panel->name, rc);
-	}
+	if (status)
+		rc = DSI_PANEL_SEND(panel, DISP_HBM_FOD_ON);
+	else
+		rc = DSI_PANEL_SEND(panel, DISP_HBM_FOD_OFF);
 
 	return rc;
 }
