@@ -843,6 +843,21 @@ static u32 dsi_panel_get_backlight(struct dsi_panel *panel)
 	return panel->bl_config.bl_level;
 }
 
+static int dsi_panel_adj_dc_backlight(struct dsi_panel *panel, bool status)
+{
+	u32 bl_lvl = dsi_panel_get_backlight(panel);
+	int rc;
+
+	if (status)
+		bl_lvl = max(bl_lvl, panel->bl_config.bl_dc_thresh);
+
+	rc = dsi_panel_update_backlight(panel, bl_lvl);
+	if (rc)
+		pr_err("Failed to update backlight\n");
+
+	return rc;
+}
+
 enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
 						  enum msm_dim_layer_type type)
 {
@@ -879,6 +894,11 @@ enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
 					       DISP_HBM_FOD_OFF_DOZE_LBM_ON);
 		}
 	}
+	else if (panel->dimlayer_type == MSM_DIM_LAYER_TOP ||
+		 type == MSM_DIM_LAYER_TOP) {
+		/* Switching DC dimming on or off. Adjust backlight.  */
+		dsi_panel_adj_dc_backlight(panel, panel->dc_dimming);
+	}
 
 	/* Swap new status with previous one */
 	type = xchg(&panel->dimlayer_type, type);
@@ -901,6 +921,14 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 
 	if (panel->host_config.ext_bridge_mode)
 		return 0;
+
+	/* Keep HW backlight above threshold if:
+	 * - DC dimming is enabled by user
+	 * - requested backlight level is not zero
+	 * - panel is not in doze mode
+	 */
+	if (panel->dc_dimming && bl_lvl && !panel->doze_status)
+		bl_lvl = max(bl->bl_dc_thresh, bl_lvl);
 
 	pr_debug("backlight type:%d lvl:%d\n", bl->type, bl_lvl);
 	switch (bl->type) {

@@ -255,6 +255,7 @@ struct dsi_panel {
 
 	struct brightness_alpha_pair *dc_dim_lut;
 	u32 dc_dim_lut_count;
+	bool dc_dimming;
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)

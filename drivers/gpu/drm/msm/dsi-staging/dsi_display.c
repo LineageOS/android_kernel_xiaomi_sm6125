@@ -7104,6 +7104,12 @@ int dsi_display_get_dim_layer_alpha(void *dsi_display,
 		 */
 		rc = 1;
 		break;
+	case MSM_DIM_LAYER_TOP:
+		/* Enable dimming layer if DC dimming is enabled */
+		rc = display->panel->dc_dimming ? 1 : 0;
+		if (rc)
+			*alpha = dsi_panel_get_dc_dim_alpha(display->panel);
+		break;
 	default:
 		pr_warn("Unknown dimming layer type\n");
 	}
