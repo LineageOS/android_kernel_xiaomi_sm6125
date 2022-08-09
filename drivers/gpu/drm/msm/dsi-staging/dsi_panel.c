@@ -987,33 +987,52 @@ static u32 interpolate(uint32_t x, uint32_t xa, uint32_t xb, uint32_t ya, uint32
 	return ya - (ya - yb) * (x - xa) / (xb - xa);
 }
 
-u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
+static u32 brightness_to_alpha(struct brightness_alpha_pair *lut, u32 lut_count,
+			       u32 brightness)
 {
-	u32 brightness = dsi_panel_get_backlight(panel);
 	int i;
 
+	if (!lut)
+		return 0;
+
+	for (i = 0; i < lut_count; i++)
+		if (lut[i].brightness >= brightness)
+			break;
+
+	if (!i)
+		return lut[i].alpha;
+	else if (i == lut_count)
+		return lut[i - 1].alpha;
+
+	return interpolate(brightness,
+			   lut[i - 1].brightness, lut[i].brightness,
+			   lut[i - 1].alpha, lut[i].alpha);
+}
+
+u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
+{
 	/* No dimming is required if HBM mode is enabled and device
 	 * is not in doze mode.
 	 */
 	if (panel->hbm_enabled && !panel->doze_status)
 		return 0;
 
-	if (!panel->fod_dim_lut)
+	return brightness_to_alpha(panel->fod_dim_lut, panel->fod_dim_lut_count,
+				   dsi_panel_get_backlight(panel));
+}
+
+u32 dsi_panel_get_dc_dim_alpha(struct dsi_panel *panel)
+{
+	u32 bl_lvl = dsi_panel_get_backlight(panel);
+
+	/* No dimming required if HBM mode is enabled by user or
+	 * device is in doze mode or backlight value is zero.
+	 */
+	if (panel->hbm_enabled || panel->doze_status || !bl_lvl)
 		return 0;
 
-	for (i = 0; i < panel->fod_dim_lut_count; i++)
-		if (panel->fod_dim_lut[i].brightness >= brightness)
-			break;
-
-	if (i == 0)
-		return panel->fod_dim_lut[i].alpha;
-
-	if (i == panel->fod_dim_lut_count)
-		return panel->fod_dim_lut[i - 1].alpha;
-
-	return interpolate(brightness,
-			panel->fod_dim_lut[i - 1].brightness, panel->fod_dim_lut[i].brightness,
-			panel->fod_dim_lut[i - 1].alpha, panel->fod_dim_lut[i].alpha);
+	return brightness_to_alpha(panel->dc_dim_lut, panel->dc_dim_lut_count,
+				   bl_lvl);
 }
 
 int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status)
