@@ -8604,8 +8604,24 @@ int dsi_display_pre_kickoff(struct drm_connector *connector,
 		struct dsi_display *display,
 		struct msm_display_kickoff_params *params)
 {
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	enum msm_dim_layer_type type = params->dim_layer_type;
+	enum msm_dim_layer_type prev_type;
+#endif
 	int rc = 0;
 	int i;
+
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	/* pass current dimming layer type to panel */
+	prev_type = dsi_panel_update_dimlayer(display->panel, type);
+
+	/* notify userspace if we are switching from or to FOD dimming
+	 * layer type
+	 */
+	if ((type == MSM_DIM_LAYER_FOD || prev_type == MSM_DIM_LAYER_FOD) &&
+	    (type != prev_type))
+		dsi_display_set_fod_ui(display, type == MSM_DIM_LAYER_FOD);
+#endif
 
 	/* check and setup MISR */
 	if (display->misr_enable)
