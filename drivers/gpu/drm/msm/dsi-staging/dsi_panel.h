@@ -256,6 +256,7 @@ struct dsi_panel {
 	struct brightness_alpha_pair *dc_dim_lut;
 	u32 dc_dim_lut_count;
 	u32 dc_dim_alpha;
+	u32 hw_bl_lvl;
 	bool dc_dimming;
 };
 
