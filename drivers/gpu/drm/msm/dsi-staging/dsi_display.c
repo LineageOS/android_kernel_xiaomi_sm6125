@@ -5563,14 +5563,57 @@ static ssize_t hbm_store(struct device *dev, struct device_attribute *attr,
 	return !rc ? count : rc;
 }
 
+static ssize_t dc_dimming_show(struct device *dev,
+			       struct device_attribute *attr,
+			       char *buf)
+{
+	struct dsi_display *display;
+
+	display = dev_get_drvdata(dev);
+	if (!display) {
+		pr_err("Invalid display\n");
+		return -EINVAL;
+	}
+
+	return snprintf(buf, PAGE_SIZE, "%d\n",
+			dsi_panel_get_dc_dimming(display->panel));
+}
+
+static ssize_t dc_dimming_store(struct device *dev,
+				struct device_attribute *attr,
+				const char *buf, size_t count)
+{
+	struct dsi_display *display;
+	bool status;
+	int rc;
+
+	display = dev_get_drvdata(dev);
+	if (!display) {
+		pr_err("Invalid display\n");
+		return -EINVAL;
+	}
+
+	rc = kstrtobool(buf, &status);
+	if (rc) {
+		pr_err("%s: kstrtobool failed. rc=%d\n", __func__, rc);
+		return rc;
+	}
+
+	dsi_panel_set_dc_dimming(display->panel, status);
+
+	return count;
+}
+
 static DEVICE_ATTR(fod_ui, 0444,
 			sysfs_fod_ui_read,
 			NULL);
 static DEVICE_ATTR_RW(hbm);
+static DEVICE_ATTR_RW(dc_dimming);
 
 static struct attribute *display_fs_attrs[] = {
 	&dev_attr_fod_ui.attr,
 	&dev_attr_hbm.attr,
+	&dev_attr_dc_dimming.attr,
 	NULL,
 };
 static struct attribute_group display_fs_attrs_group = {
