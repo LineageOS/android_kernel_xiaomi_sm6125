@@ -1016,39 +1016,6 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 			panel->fod_dim_lut[i - 1].alpha, panel->fod_dim_lut[i].alpha);
 }
 
-int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
-{
-	int rc = 0;
-
-	if (status) {
-		/* Switch to HBM mode if:
-		 * - it is not already enabled by user
-		 * - we're coming from doze mode
-		 */
-		if (!panel->hbm_enabled || panel->doze_status)
-			rc = dsi_panel_set_hbm(panel, true);
-	} else {
-		if (!panel->doze_status) {
-			/* Switching back to normal mode */
-
-			/* Switch-off HBM mode if it is not enabled by user */
-			if (!panel->hbm_enabled)
-				rc = dsi_panel_set_hbm(panel, false);
-
-			return rc;
-		}
-		/* Switching back to doze mode */
-		if (panel->hbm_enabled)
-			rc = DSI_PANEL_SEND(panel,
-					    DISP_HBM_FOD_OFF_DOZE_HBM_ON);
-		else
-			rc = DSI_PANEL_SEND(panel,
-					    DISP_HBM_FOD_OFF_DOZE_LBM_ON);
-	}
-
-	return rc;
-}
-
 int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status)
 {
 	int rc = 0;

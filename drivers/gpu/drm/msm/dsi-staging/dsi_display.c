@@ -5645,7 +5645,7 @@ static int dsi_display_sysfs_deinit(struct dsi_display *display)
 
 }
 
-void dsi_display_set_fod_ui(struct dsi_display *display, bool status)
+static void dsi_display_set_fod_ui(struct dsi_display *display, bool status)
 {
 	struct device *dev = &display->pdev->dev;
 	atomic_set(&display->fod_ui, status);
@@ -8464,10 +8464,6 @@ int dsi_display_unprepare(struct dsi_display *display)
 
 	SDE_EVT32(SDE_EVTLOG_FUNC_EXIT);
 	return rc;
-}
-
-struct dsi_display *get_main_display(void) {
-	return primary_display;
 }
 
 static int __init dsi_display_register(void)
