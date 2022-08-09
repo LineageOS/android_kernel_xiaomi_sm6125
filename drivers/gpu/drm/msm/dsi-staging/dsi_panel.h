@@ -246,6 +246,7 @@ struct dsi_panel {
 	bool hbm_enabled;
 	bool sync_broadcast_en;
 	int power_mode;
+	enum msm_dim_layer_type dimlayer_type;
 	enum dsi_panel_physical_type panel_type;
 
 	struct brightness_alpha_pair *fod_dim_lut;
@@ -394,5 +395,8 @@ static inline bool dsi_panel_is_hbm_enabled(struct dsi_panel *panel)
 }
 
 int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status);
+
+enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
+						  enum msm_dim_layer_type type);
 
 #endif /* _DSI_PANEL_H_ */
