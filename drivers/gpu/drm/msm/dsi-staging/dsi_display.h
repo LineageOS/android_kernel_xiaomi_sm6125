@@ -726,6 +726,18 @@ int dsi_lowpower_register_client(struct notifier_block *nb);
 
 int dsi_display_param_store(struct dsi_display *display, uint32_t param);
 
+/**
+ * dsi_display_get_dim_layer_alpha - get global dimming layer alpha value
+ * @display: Pointer to private display structure
+ * @type: Type of dimming layer
+ * @alpha: Out alpha value for dimming layer
+ * Returns: 0 - Disable global dimming layer
+ *	    1 - Enable global dimming layer using returned alpha value
+ *	    error-code - Failure
+ */
+int dsi_display_get_dim_layer_alpha(void *display, enum msm_dim_layer_type type,
+				    u32 *alpha);
+
 struct dsi_display *get_main_display(void);
 
 void dsi_display_set_fod_ui(struct dsi_display *display, bool status);
