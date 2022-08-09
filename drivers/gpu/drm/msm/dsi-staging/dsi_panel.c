@@ -859,7 +859,8 @@ static int dsi_panel_adj_dc_backlight(struct dsi_panel *panel, bool status)
 }
 
 enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
-						  enum msm_dim_layer_type type)
+						  enum msm_dim_layer_type type,
+						  u32 alpha)
 {
 	dsi_panel_acquire_panel_lock(panel);
 
@@ -904,6 +905,12 @@ enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
 	type = xchg(&panel->dimlayer_type, type);
 
 no_change:
+	/* Update stored alpha if it was changed and dim layer type is TOP */
+	if (panel->dimlayer_type == MSM_DIM_LAYER_TOP &&
+	    panel->dc_dim_alpha != alpha) {
+		panel->dc_dim_alpha = alpha;
+	}
+
 	dsi_panel_release_panel_lock(panel);
 
 	/* Return previous dimming layer type */

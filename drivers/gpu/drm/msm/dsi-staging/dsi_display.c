@@ -8091,7 +8091,8 @@ int dsi_display_pre_kickoff(struct drm_connector *connector,
 	int i;
 
 	/* pass current dimming layer type to panel */
-	prev_type = dsi_panel_update_dimlayer(display->panel, type);
+	prev_type = dsi_panel_update_dimlayer(display->panel, type,
+					      params->dim_layer_alpha);
 
 	/* notify userspace if we are switching from or to FOD dimming
 	 * layer type
