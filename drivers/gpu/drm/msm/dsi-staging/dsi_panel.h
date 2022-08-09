@@ -258,6 +258,9 @@ struct dsi_panel {
 	bool hbm_enabled;
 	bool sync_broadcast_en;
 	int power_mode;
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	enum msm_dim_layer_type dimlayer_type;
+#endif
 	enum dsi_panel_physical_type panel_type;
 
 #ifdef CONFIG_MACH_XIAOMI_F9S
@@ -417,6 +420,9 @@ static inline bool dsi_panel_is_hbm_enabled(struct dsi_panel *panel)
 }
 
 int dsi_panel_set_hbm_enabled(struct dsi_panel *panel, bool status);
+
+enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
+						  enum msm_dim_layer_type type);
 #endif
 
 #endif /* _DSI_PANEL_H_ */
