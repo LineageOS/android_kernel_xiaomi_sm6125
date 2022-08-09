@@ -2720,6 +2720,14 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
 	if (rc)
 		pr_err("[%s failed to parse fod dim lut\n", panel->name);
 
+	panel->bl_config.bl_dc_thresh = 0;
+	rc = utils->read_u32(utils->data, "qcom,mdss-dsi-panel-dc-threshold",
+				  &val);
+	if (!rc)
+		panel->bl_config.bl_dc_thresh = val;
+	else
+		pr_err("[%s] dc-threshold unspecified\n", panel->name);
+
 	if (panel->bl_config.type == DSI_BACKLIGHT_PWM) {
 		rc = dsi_panel_parse_bl_pwm_config(panel);
 		if (rc) {
