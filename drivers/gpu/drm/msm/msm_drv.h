@@ -283,6 +283,18 @@ enum msm_event_wait {
 	MSM_ENC_ACTIVE_REGION,
 };
 
+#ifdef CONFIG_MACH_XIAOMI_F9S
+/**
+ * enum msm_dim_layer_type - global dimming layer types
+ * @MSM_DIM_LAYER_NONE:	None (used to indicate there is no dimming active)
+ * @MSM_DIM_LAYER_TOP:	Top-most layer for global attentuation
+ */
+enum msm_dim_layer_type {
+	MSM_DIM_LAYER_NONE,
+	MSM_DIM_LAYER_TOP,
+};
+#endif
+
 /**
  * struct msm_roi_alignment - region of interest alignment restrictions
  * @xstart_pix_align: left x offset alignment restriction
@@ -548,10 +560,14 @@ struct msm_roi_list {
  * @rois: Regions of interest structure for mapping CRTC to Connector output
  * @qsync_mode: Qsync mode, where 0: disabled 1: continuous mode
  * @qsync_update: Qsync settings were changed/updated
+ * @dim_layer_type: Indicates currently present type of global dimming layer
  */
 struct msm_display_kickoff_params {
 	struct msm_roi_list *rois;
 	struct drm_msm_ext_hdr_metadata *hdr_meta;
+#ifdef CONFIG_MACH_XIAOMI_F9S
+	enum msm_dim_layer_type dim_layer_type;
+#endif
 };
 
 /**
