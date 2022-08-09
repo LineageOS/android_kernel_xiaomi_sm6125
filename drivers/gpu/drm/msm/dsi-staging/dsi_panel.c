@@ -863,11 +863,13 @@ enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
 						  enum msm_dim_layer_type type,
 						  u32 alpha)
 {
+	bool adjust_bl = false;
+
 	dsi_panel_acquire_panel_lock(panel);
 
 	/* Skip if type of dimlayer was not changed */
 	if (panel->dimlayer_type == type)
-		goto no_change;
+		goto no_type_change;
 
 	if (type == MSM_DIM_LAYER_FOD) {
 		/* Switch to FOD mode */
@@ -899,24 +901,36 @@ enum msm_dim_layer_type dsi_panel_update_dimlayer(struct dsi_panel *panel,
 	else if (panel->dimlayer_type == MSM_DIM_LAYER_TOP ||
 		 type == MSM_DIM_LAYER_TOP) {
 		/* Switching DC dimming on or off. Adjust backlight.  */
-		dsi_panel_adj_dc_backlight(panel, panel->dc_dimming);
+		adjust_bl = true;
 	}
 
 	/* Swap new status with previous one */
 	type = xchg(&panel->dimlayer_type, type);
 
-no_change:
+no_type_change:
 	/* Update stored alpha if it was changed and dim layer type is TOP */
 	if (panel->dimlayer_type == MSM_DIM_LAYER_TOP &&
 	    panel->dc_dim_alpha != alpha) {
 		panel->dc_dim_alpha = alpha;
+
+		/* Alpha value was changed so we need to set HW backlight
+		 * back to DC threshold.
+		 */
+		adjust_bl = true;
 	}
+
+	/* Adjust DC backlight if necessary */
+	if (adjust_bl)
+		dsi_panel_adj_dc_backlight(panel, panel->dc_dimming);
 
 	dsi_panel_release_panel_lock(panel);
 
 	/* Return previous dimming layer type */
 	return type;
 }
+
+static u32 alpha_to_brightness(struct brightness_alpha_pair *lut, u32 lut_count,
+			       u32 alpha);
 
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 {
@@ -930,13 +944,40 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 	if (panel->host_config.ext_bridge_mode)
 		return 0;
 
-	/* Keep HW backlight above threshold if:
+	/* Modify HW backlight above threshold if:
 	 * - DC dimming is enabled by user
 	 * - requested backlight level is not zero
 	 * - panel is not in doze mode
 	 */
-	if (panel->dc_dimming && bl_lvl && !panel->doze_status)
-		bl_lvl = max(bl->bl_dc_thresh, bl_lvl);
+	if (panel->dc_dimming && bl_lvl && !panel->doze_status) {
+		u32 brightness, hw_bl_lvl;
+
+		/* Get brightness for current dim layer alpha value
+		 * The range is [0, dc_threshold] so for case that
+		 * HW backlight value is dc_threshold.
+		 */
+		brightness = alpha_to_brightness(panel->dc_dim_lut,
+						 panel->dc_dim_lut_count,
+						 panel->dc_dim_alpha);
+
+		/* Get current HW backlight level, if it is zero then
+		 * use DC threshold.
+		 */
+		hw_bl_lvl = panel->hw_bl_lvl ? : bl->bl_dc_thresh;
+
+		/* Transform computed brightness if current HW backlight
+		 * is different from DC threshold.
+		 */
+		if (hw_bl_lvl != bl->bl_dc_thresh)
+			brightness = DIV_ROUND_CLOSEST(brightness * hw_bl_lvl,
+						       bl->bl_dc_thresh);
+
+		/* Compute new HW backlight value that represents (together
+		 * with current dimming layer alpha value) requested
+		 * backlight level.
+		 */
+		bl_lvl = DIV_ROUND_CLOSEST(bl_lvl * hw_bl_lvl, brightness);
+	}
 
 	pr_debug("backlight type:%d lvl:%d\n", bl->type, bl_lvl);
 	switch (bl->type) {
@@ -1018,9 +1059,31 @@ static int dsi_panel_pwm_register(struct dsi_panel *panel)
 	return 0;
 }
 
-static u32 interpolate(uint32_t x, uint32_t xa, uint32_t xb, uint32_t ya, uint32_t yb)
+static int interpolate(int x, int xa, int xb, int ya, int yb)
 {
-	return ya - (ya - yb) * (x - xa) / (xb - xa);
+	return ya + mult_frac(x - xa, yb - ya, xb - xa);
+}
+
+static u32 alpha_to_brightness(struct brightness_alpha_pair *lut, u32 lut_count,
+			       u32 alpha)
+{
+	int i;
+
+	if (!lut)
+		return 0;
+
+	for (i = 0; i < lut_count; i++)
+		if (lut[i].alpha <= alpha)
+			break;
+
+	if (!i)
+		return lut[i].brightness;
+	else if (i == lut_count)
+		return lut[i - 1].brightness;
+
+	return interpolate(alpha,
+			   lut[i - 1].alpha, lut[i].alpha,
+			   lut[i - 1].brightness, lut[i].brightness);
 }
 
 static u32 brightness_to_alpha(struct brightness_alpha_pair *lut, u32 lut_count,
