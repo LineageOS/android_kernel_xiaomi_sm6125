@@ -626,6 +626,7 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 	struct sde_connector *c_conn;
 	struct sde_connector_state *c_state;
 	struct msm_display_kickoff_params params;
+	struct sde_crtc_state *crtc_state;
 	int rc;
 
 	if (!connector) {
@@ -635,6 +636,7 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 
 	c_conn = to_sde_connector(connector);
 	c_state = to_sde_connector_state(connector->state);
+	crtc_state = to_sde_crtc_state(c_conn->encoder->crtc->state);
 	if (!c_conn->display) {
 		SDE_ERROR("invalid connector display\n");
 		return -EINVAL;
@@ -651,6 +653,7 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 
 	params.rois = &c_state->rois;
 	params.hdr_meta = &c_state->hdr_meta;
+	params.dim_layer_type = crtc_state->global_dim_layer_type;
 
 	SDE_EVT32_VERBOSE(connector->base.id);
 
@@ -1536,6 +1539,28 @@ int sde_connector_get_panel_vfp(struct drm_connector *connector,
 		SDE_ERROR("Failed get_panel_vfp %d\n", vfp);
 
 	return vfp;
+}
+
+int sde_connector_get_dim_layer_alpha(struct drm_connector *connector,
+				      enum msm_dim_layer_type type, u32 *alpha)
+{
+	struct sde_connector *c_conn;
+	int rc;
+
+	if (!connector || !alpha) {
+		SDE_ERROR("Invalid input parameters\n");
+		return -EINVAL;
+	}
+
+	c_conn = to_sde_connector(connector);
+	if (!c_conn->ops.get_dim_layer_alpha)
+		return -ENOTSUPP;
+
+	rc = c_conn->ops.get_dim_layer_alpha(c_conn->display, type, alpha);
+	if (rc < 0 && rc != -ENOTSUPP)
+		SDE_ERROR("Failed to get alpha for global dimming layer\n");
+
+	return rc;
 }
 
 static int _sde_debugfs_conn_cmd_tx_open(struct inode *inode, struct file *file)
