@@ -78,6 +78,8 @@
 		qcom,mdss-dsi-reset-sequence = <1 12>, <0 2>, <1 10>;
 		qcom,mdss-pan-physical-width-dimension = <65>;
 		qcom,mdss-pan-physical-height-dimension = <140>;
+		qcom,disp-doze-lbm-backlight = <15>;
+		qcom,disp-doze-hbm-backlight = <190>;
 
 		qcom,mdss-dsi-display-timings {
 			timing@0 {
