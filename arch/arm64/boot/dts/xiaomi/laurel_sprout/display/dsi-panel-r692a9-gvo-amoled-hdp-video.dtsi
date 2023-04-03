@@ -80,6 +80,56 @@
 		qcom,mdss-pan-physical-height-dimension = <140>;
 		qcom,disp-doze-lbm-backlight = <15>;
 		qcom,disp-doze-hbm-backlight = <190>;
+		qcom,mdss-dsi-panel-dc-threshold = <610>;
+
+		qcom,disp-fod-dim-lut = <
+			/* brightness, alpha */
+			0	0XFF
+			3	0XF1
+			13	0XE5
+			31	0XDA
+			58	0XCF
+			96	0XC4
+			143	0XB9
+			200	0XAE
+			269	0XA4
+			348	0X99
+			439	0X8F
+			551	0X83
+			667	0X79
+			794	0X6F
+			934	0X64
+			1086	0X5A
+			1250	0X50
+			1427	0X46
+			1618	0X3C
+			1821	0X32
+			2047	0X28
+		>;
+		qcom,disp-dc-dim-lut = <
+			/* brightness, alpha */
+			0	0XFF
+			1	0XEE
+			4	0XE0
+			9	0XD4
+			18	0XC5
+			29	0XB8
+			43	0XAC
+			60	0X9F
+			81	0X92
+			106	0X85
+			132	0X79
+			163	0X6D
+			198	0X60
+			237	0X54
+			277	0X48
+			323	0X3C
+			373	0X2F
+			428	0X23
+			481	0X18
+			544	0XC
+			610	0X0
+		>;
 
 		qcom,mdss-dsi-display-timings {
 			timing@0 {
