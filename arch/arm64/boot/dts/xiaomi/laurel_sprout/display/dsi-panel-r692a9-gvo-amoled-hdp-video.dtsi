@@ -174,14 +174,14 @@
 				qcom,mdss-dsi-r692a9-page00-command = [
 				15 01 00 00 00 00 02 FE 00
 				];
-				 qcom,mdss-dsi-nolp-command = [
+				qcom,mdss-dsi-nolp-command = [
 				  15 01 00 00 00 00 02 53 28
 				];
-				qcom,mdss-dsi-doze-lb-command = [
+				qcom,mdss-dsi-doze-lbm-command = [
 				  15 01 00 00 00 00 02 53 20
 				  39 01 00 00 00 00 03 51 00 0F
 				];
-				qcom,mdss-dsi-doze-hb-command = [
+				qcom,mdss-dsi-doze-hbm-command = [
 				  15 01 00 00 00 00 02 53 20
 				  39 01 00 00 00 00 03 51 00 BE
 				];
@@ -196,8 +196,8 @@
 				qcom,mdss-dsi-brightness-command = [
 				  39 01 00 00 00 00 03 51 00 BE
 				];
-				qcom,mdss-dsi-doze-lb-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-doze-hb-command-state = "dsi_lp_mode";
+				qcom,mdss-dsi-doze-lbm-command-state = "dsi_lp_mode";
+				qcom,mdss-dsi-doze-hbm-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-dimming-brightness-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-dimming-enable-command-state= "dsi_lp_mode";
 				qcom,mdss-dsi-nolp-command-state = "dsi_lp_mode";
