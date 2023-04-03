@@ -179,11 +179,11 @@
 				qcom,mdss-dsi-post-panel-on-command = [
 				  15 01 00 00 00 00 02 55 01
 				];
-				qcom,mdss-dsi-doze-lb-command = [
+				qcom,mdss-dsi-doze-lbm-command = [
 				  15 01 00 00 00 00 02 53 20
 				  39 01 00 00 00 00 03 51 00 0F
 				];
-				qcom,mdss-dsi-doze-hb-command = [
+				qcom,mdss-dsi-doze-hbm-command = [
 				  15 01 00 00 00 00 02 53 20
 				  39 01 00 00 00 00 03 51 00 BE
 				];
@@ -205,8 +205,8 @@
 
 				qcom,mdss-dsi-post-on-command-state = "dsi_hs_mode";
 
-				qcom,mdss-dsi-doze-lb-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-doze-hb-command-state = "dsi_hs_mode";
+				qcom,mdss-dsi-doze-lbm-command-state = "dsi_hs_mode";
+				qcom,mdss-dsi-doze-hbm-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-nolp-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-dimming-brightness-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-brightness-command-state = "dsi_hs_mode";
