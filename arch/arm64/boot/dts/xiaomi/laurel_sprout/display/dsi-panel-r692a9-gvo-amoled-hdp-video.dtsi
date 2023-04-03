@@ -196,6 +196,14 @@
 				qcom,mdss-dsi-brightness-command = [
 				  39 01 00 00 00 00 03 51 00 BE
 				];
+				qcom,mdss-dsi-dispparam-hbm-fod-on-command = [
+				  15 01 00 00 00 00 02 53 20
+				  39 01 00 00 00 00 03 51 0F FF
+				];
+				qcom,mdss-dsi-dispparam-hbm-fod-off-command = [
+				  15 01 00 00 00 00 02 53 20
+				];
+
 				qcom,mdss-dsi-doze-lbm-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-doze-hbm-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-dimming-brightness-command-state = "dsi_lp_mode";
@@ -210,6 +218,8 @@
 				qcom,mdss-dsi-post-on-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
+				qcom,mdss-dsi-dispparam-hbm-fod-on-command-state = "dsi_lp_mode";
+				qcom,mdss-dsi-dispparam-hbm-fod-off-command-state = "dsi_lp_mode";
 			};
 		};
 	};
