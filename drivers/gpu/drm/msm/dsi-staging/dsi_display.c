@@ -1542,25 +1542,20 @@ int dsi_display_set_power(struct drm_connector *connector,
 		rc = dsi_panel_set_lp2(display->panel);
 		break;
 	case SDE_MODE_DPMS_ON:
-		blank = MSM_DRM_BLANK_UNBLANK;
-		notifier_data.data = &blank;
-		pr_info("enter SDE_MODE_DPMS_NOLP\n");
-		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
-					&notifier_data);
-		rc = dsi_panel_set_nolp(display->panel);
+		if (display->panel->power_mode == SDE_MODE_DPMS_LP1 ||
+			display->panel->power_mode == SDE_MODE_DPMS_LP2)
+			rc = dsi_panel_set_nolp(display->panel);
 		break;
 	case SDE_MODE_DPMS_OFF:
-		blank = MSM_DRM_BLANK_POWERDOWN;
-		notifier_data.data = &blank;
-		pr_info("enter SDE_MODE_DPMS_OFF\n");
-		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
-					&notifier_data);
-		break;
 	default:
-		break;
+		return rc;
 	}
 
-	dev->pre_sde_power_mode = power_mode;
+	pr_debug("Power mode transition from %d to %d %s",
+		 display->panel->power_mode, power_mode,
+		 rc ? "failed" : "successful");
+	if (!rc)
+		display->panel->power_mode = power_mode;
 
 	return rc;
 }
