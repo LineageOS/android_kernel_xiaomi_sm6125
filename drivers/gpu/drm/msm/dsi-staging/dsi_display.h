@@ -725,4 +725,6 @@ int dsi_lowpower_register_client(struct notifier_block *nb);
 
 int dsi_display_param_store(struct dsi_display *display, uint32_t param);
 
+struct dsi_display *get_main_display(void);
+
 #endif /* _DSI_DISPLAY_H_ */
