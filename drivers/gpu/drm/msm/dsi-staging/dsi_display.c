@@ -1768,12 +1768,10 @@ int dsi_display_set_power(struct drm_connector *connector,
 		break;
 	case SDE_MODE_DPMS_ON:
 #ifdef CONFIG_MACH_XIAOMI_F9S
-		blank = MSM_DRM_BLANK_UNBLANK;
-		notifier_data.data = &blank;
-		pr_info("enter SDE_MODE_DPMS_NOLP\n");
-		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
-					&notifier_data);
-		rc = dsi_panel_set_nolp(display->panel);
+		if (display->panel->power_mode == SDE_MODE_DPMS_LP1 ||
+			display->panel->power_mode == SDE_MODE_DPMS_LP2)
+			rc = dsi_panel_set_nolp(display->panel);
+		break;
 #else
 		if (display->panel->power_mode == SDE_MODE_DPMS_LP1 ||
 			display->panel->power_mode == SDE_MODE_DPMS_LP2) {
@@ -1792,20 +1790,8 @@ int dsi_display_set_power(struct drm_connector *connector,
 #endif
 		break;
 	case SDE_MODE_DPMS_OFF:
-#ifdef CONFIG_MACH_XIAOMI_F9S
-		blank = MSM_DRM_BLANK_POWERDOWN;
-		notifier_data.data = &blank;
-		pr_info("enter SDE_MODE_DPMS_OFF\n");
-		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
-					&notifier_data);
-		break;
-#endif
 	default:
-#ifdef CONFIG_MACH_XIAOMI_F9S
-		break;
-#else
         return rc;
-#endif
 	}
 
 	pr_debug("Power mode transition from %d to %d %s",
