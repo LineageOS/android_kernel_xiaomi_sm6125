@@ -28,12 +28,14 @@
 enum {
 	/* panel: power on */
 	MSM_DRM_BLANK_UNBLANK,
-	/* panel: power off */
-	MSM_DRM_BLANK_POWERDOWN,
 #ifdef CONFIG_MACH_XIAOMI_F9S
 	MSM_DRM_BLANK_LP1,
 	MSM_DRM_BLANK_LP2,
+	MSM_DRM_BLANK_STANDBY,
+	MSM_DRM_BLANK_SUSPEND,
 #endif
+	/* panel: power off */
+	MSM_DRM_BLANK_POWERDOWN,
 };
 
 #ifdef CONFIG_MACH_XIAOMI_C3J
@@ -69,6 +71,9 @@ struct drm_notify_data {
 
 int msm_drm_register_client(struct notifier_block *nb);
 int msm_drm_unregister_client(struct notifier_block *nb);
+#ifdef CONFIG_MACH_XIAOMI_F9S
+int msm_drm_notifier_call_chain(unsigned long val, void *v);
+#endif
 #ifdef CONFIG_MACH_XIAOMI_C3J
 int drm_register_client(struct notifier_block *nb);
 int drm_unregister_client(struct notifier_block *nb);
