@@ -1751,13 +1751,13 @@ static enum power_supply_property smb5_batt_props[] = {
 	POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN,
 	POWER_SUPPLY_PROP_TIME_TO_FULL_NOW,
 	POWER_SUPPLY_PROP_FCC_STEPPER_ENABLE,
+	POWER_SUPPLY_PROP_CHARGING_ENABLED,
 #ifdef CONFIG_MACH_XIAOMI_F9S
 	POWER_SUPPLY_PROP_STOPCHARGING_TEST,
 	POWER_SUPPLY_PROP_STARTCHARGING_TEST,
 	POWER_SUPPLY_PROP_CHARGING_CALL_STATE,
 #endif
 #ifdef CONFIG_MACH_XIAOMI_C3J
-	POWER_SUPPLY_PROP_CHARGING_ENABLED,
 	POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL,
 #endif
 };
@@ -1809,6 +1809,9 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_CHARGER_TEMP:
 		rc = smblib_get_prop_charger_temp(chg, val);
+		break;
+	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
+		val->intval = !get_effective_result(chg->chg_disable_votable);
 		break;
 	case POWER_SUPPLY_PROP_CHARGER_TEMP_MAX:
 		val->intval = chg->charger_temp_max;
@@ -1947,9 +1950,6 @@ static int smb5_batt_get_prop(struct power_supply *psy,
         break;
 #endif
 #ifdef CONFIG_MACH_XIAOMI_C3J
-	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
-		rc = smblib_get_prop_battery_charging_enabled(chg, val);
-		break;
 	case POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL:
 		rc = smblib_get_prop_system_temp_level(chg, val);
 		break;
@@ -2017,6 +2017,9 @@ static int smb5_batt_set_prop(struct power_supply *psy,
 			vote(chg->fcc_votable, BATT_PROFILE_VOTER, false, 0);
 		}
 		break;
+	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
+		vote(chg->chg_disable_votable, USER_VOTER, !!!val->intval, 0);
+		break;
 	case POWER_SUPPLY_PROP_SET_SHIP_MODE:
 		/* Not in ship mode as long as the device is active */
 		if (!val->intval)
@@ -2056,9 +2059,6 @@ static int smb5_batt_set_prop(struct power_supply *psy,
 #endif
 		break;
 #ifdef CONFIG_MACH_XIAOMI_C3J
-	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
-		rc = smblib_set_prop_battery_charging_enabled(chg, val);
-		break;
 	case POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL:
 		rc = smblib_set_prop_system_temp_level(chg, val);
 		break;
@@ -2086,6 +2086,7 @@ static int smb5_batt_prop_is_writeable(struct power_supply *psy,
 	switch (psp) {
 	case POWER_SUPPLY_PROP_STATUS:
 	case POWER_SUPPLY_PROP_INPUT_SUSPEND:
+	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
 	case POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL:
 	case POWER_SUPPLY_PROP_CAPACITY:
 	case POWER_SUPPLY_PROP_PARALLEL_DISABLE:
@@ -2096,9 +2097,6 @@ static int smb5_batt_prop_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_DIE_HEALTH:
 #ifdef CONFIG_MACH_XIAOMI_F9S
 	case POWER_SUPPLY_PROP_CHARGING_CALL_STATE:
-#endif
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
 #endif
 		return 1;
 	default:

@@ -888,10 +888,4 @@ int smblib_get_qc3_main_icl_offset(struct smb_charger *chg, int *offset_ua);
 
 int smblib_init(struct smb_charger *chg);
 int smblib_deinit(struct smb_charger *chg);
-#ifdef CONFIG_MACH_XIAOMI_C3J
-int smblib_set_prop_battery_charging_enabled(struct smb_charger *chg,
-                const union power_supply_propval *val);
-int smblib_get_prop_battery_charging_enabled(struct smb_charger *chg,
-                union power_supply_propval *val);
-#endif
 #endif /* __SMB5_CHARGER_H */
