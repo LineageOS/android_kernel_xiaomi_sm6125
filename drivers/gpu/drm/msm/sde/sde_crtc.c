@@ -5344,7 +5344,7 @@ static int _sde_crtc_setup_global_dim_layer(struct sde_crtc_state *cstate,
 
 	/* Setup the layer */
 	dim_layer->flags = SDE_DRM_DIM_LAYER_INCLUSIVE;
-	dim_layer->stage = layer_stage;
+	dim_layer->stage = layer_stage - 1;
 	dim_layer->rect.x = 0;
 	dim_layer->rect.y = 0;
 	dim_layer->rect.w = mode->hdisplay;
