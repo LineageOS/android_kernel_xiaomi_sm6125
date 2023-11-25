@@ -85,27 +85,27 @@
 
 		qcom,disp-fod-dim-lut = <
 			/* brightness, alpha */
-			0	0xFF
-			3	0xF4
-			13	0xE9
-			31	0xDF
-			58	0xD5
-			96	0xCA
-			143	0xC0
-			200	0xB5
-			269	0xAB
-			348	0xA0
-			439	0x96
-			551	0x8A
-			667	0x80
-			794	0x75
-			934	0x6B
-			1086	0x60
-			1250	0x56
-			1427	0x4B
-			1618	0x41
-			1821	0x36
-			2047	0x2B
+			0	0XFF
+			3	0XEB
+			13	0XDD
+			31	0XD0
+			58	0XC4
+			96	0XB8
+			143	0XAD
+			200	0XA2
+			269	0X97
+			348	0X8D
+			439	0X83
+			551	0X78
+			667	0X6E
+			794	0X65
+			934	0X5B
+			1086	0X52
+			1250	0X48
+			1427	0X3F
+			1618	0X36
+			1821	0X2D
+			2047	0X24
 		>;
 		qcom,disp-dc-dim-lut = <
 			/* brightness, alpha */
