@@ -205,7 +205,7 @@
 				qcom,mdss-dsi-dispparam-hbm-fod-on-command = [
 					15 01 00 00 10 00 02 53 E0];
 				qcom,mdss-dsi-dispparam-hbm-fod-off-command = [
-					15 01 00 00 10 00 02 53 20];
+					15 01 00 00 12 00 02 53 20];
 				qcom,mdss-dsi-dispparam-hbm-fod-off-doze-lbm-on-command = [
 					15 01 00 00 10 00 02 53 23];
 				qcom,mdss-dsi-dispparam-hbm-fod-off-doze-hbm-on-command = [
