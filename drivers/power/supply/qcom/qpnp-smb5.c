@@ -1870,7 +1870,7 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 		val->intval = 0;
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
-		val->intval = 4030;
+		val->intval = 4030000;
 		break;
 	case POWER_SUPPLY_PROP_TIME_TO_FULL_NOW:
 		rc = smblib_get_prop_from_bms(chg,
@@ -2002,7 +2002,7 @@ static int smb5_batt_set_prop(struct power_supply *psy,
 		pr_err("WT call state =%d\n",chg->call_state);
 		smb5_set_calling_current(chg);
 		break;
-	
+
 	default:
 		rc = -EINVAL;
 	}
