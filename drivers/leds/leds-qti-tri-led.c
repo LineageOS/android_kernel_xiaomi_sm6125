@@ -406,48 +406,42 @@ static const struct attribute *breath_attrs[] = {
 static int qpnp_tri_led_register(struct qpnp_tri_led_chip *chip)
 {
 	struct qpnp_led_dev *led;
-	int rc, i, j;
+	int rc;
 
-	for (i = 0; i < chip->num_leds; i++) {
-		led = &chip->leds[i];
-		mutex_init(&led->lock);
-		led->cdev.name = led->label;
-		led->cdev.max_brightness = LED_FULL;
-		led->cdev.brightness_set_blocking = qpnp_tri_led_set_brightness;
-		led->cdev.brightness_get = qpnp_tri_led_get_brightness;
-		led->cdev.blink_set = qpnp_tri_led_set_blink;
-		led->cdev.default_trigger = led->default_trigger;
-		led->cdev.brightness = LED_OFF;
-		led->cdev.flags |= LED_KEEP_TRIGGER;
+	led = &chip->leds[0];
+	mutex_init(&led->lock);
+	led->cdev.name = "white";
+	led->cdev.max_brightness = LED_FULL;
+	led->cdev.brightness_set_blocking = qpnp_tri_led_set_brightness;
+	led->cdev.brightness_get = qpnp_tri_led_get_brightness;
+	led->cdev.blink_set = qpnp_tri_led_set_blink;
+	led->cdev.default_trigger = led->default_trigger;
+	led->cdev.brightness = LED_OFF;
+	led->cdev.flags |= LED_KEEP_TRIGGER;
 
-		rc = devm_led_classdev_register(chip->dev, &led->cdev);
+	rc = devm_led_classdev_register(chip->dev, &led->cdev);
+	if (rc < 0) {
+		dev_err(chip->dev, "%s led class device registering failed, rc=%d\n",
+				led->label, rc);
+		goto err_out;
+	}
+
+	if (pwm_get_output_type_supported(led->pwm_dev)
+			& PWM_OUTPUT_MODULATED) {
+		rc = sysfs_create_files(&led->cdev.dev->kobj,
+				breath_attrs);
 		if (rc < 0) {
-			dev_err(chip->dev, "%s led class device registering failed, rc=%d\n",
-							led->label, rc);
+			dev_err(chip->dev, "Create breath file for %s led failed, rc=%d\n",
+					led->label, rc);
 			goto err_out;
-		}
-
-		if (pwm_get_output_type_supported(led->pwm_dev)
-				& PWM_OUTPUT_MODULATED) {
-			rc = sysfs_create_files(&led->cdev.dev->kobj,
-					breath_attrs);
-			if (rc < 0) {
-				dev_err(chip->dev, "Create breath file for %s led failed, rc=%d\n",
-						led->label, rc);
-				goto err_out;
-			}
 		}
 	}
 
 	return 0;
 
 err_out:
-	for (j = 0; j <= i; j++) {
-		if (j < i)
-			sysfs_remove_files(&chip->leds[j].cdev.dev->kobj,
-					breath_attrs);
-		mutex_destroy(&chip->leds[j].lock);
-	}
+	sysfs_remove_files(&led->cdev.dev->kobj, breath_attrs);
+	mutex_destroy(&led->lock);
 	return rc;
 }
 
