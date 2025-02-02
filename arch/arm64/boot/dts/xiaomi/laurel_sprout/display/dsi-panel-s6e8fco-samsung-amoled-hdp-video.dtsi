@@ -86,8 +86,9 @@
 		qcom,disp-fod-dim-lut = <
 			/* brightness, alpha */
 			0	0XFF
-			1	0XF3
-			16	0XD8
+			3	0XEB
+			13	0XDD
+			31	0XD0
 			33	0XCA
 			48	0XC1
 			97	0XAC
