@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc370d47_f3eaa02f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 31655
+      },
+      "writtenOn": "2025-03-19T17:42:19Z",
+      "side": 1,
+      "message": "depends on: https://review.lineageos.org/q/topic:sm8150-sched-backports",
+      "revId": "66a9f0832f0a2d43fcd516dbdb7d3109b9f6a4b6",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
