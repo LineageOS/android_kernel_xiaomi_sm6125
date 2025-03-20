@@ -5848,6 +5848,9 @@ int wma_rx_service_ready_event(void *handle, uint8_t *cmd_param_info,
 		 wma_handle->hw_bd_info[PROJECT_ID],
 		 wma_handle->hw_bd_info[BOARD_DATA_REV]);
 
+	/* Disable WMI_SERVICE_MGMT_TX_WMI to avoid excessive Uninterruptible Sleep */
+	WMI_SERVICE_DISABLE(wma_handle->wmi_service_bitmap, WMI_SERVICE_MGMT_TX_WMI);
+
 	/* wmi service is ready */
 	qdf_mem_copy(wma_handle->wmi_service_bitmap,
 		     service_bitmap,
