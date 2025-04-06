@@ -7655,6 +7655,12 @@ int dsi_display_get_dim_layer_alpha(void *dsi_display,
 		 */
 		rc = 1;
 		break;
+    case MSM_DIM_LAYER_TOP:
+        /*
+         * Return 0 to not trigger the dimming layer.
+         */
+        rc = 0;
+        break;
 	default:
 		pr_warn("Unknown dimming layer type\n");
 	}
