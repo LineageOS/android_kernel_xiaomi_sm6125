@@ -850,7 +850,6 @@ int dsi_panel_set_brightness(struct dsi_panel *panel, u8 dimming, u32 brightness
 		return -EINVAL;
 	}
 
-	pr_info("dimming_normal = 0x%x, brightness = %u\n", dimming, brightness);
 	((u8 *)panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_BACKLIGHT].cmds[0].msg.tx_buf)[1]
 						= (brightness >> 8)& 0xf;
 	((u8 *)panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_BACKLIGHT].cmds[0].msg.tx_buf)[2]
@@ -872,7 +871,6 @@ int dsi_panel_set_dimming_brightness(struct dsi_panel *panel, u8 dimming, u32 br
 		return -EINVAL;
 	}
 
-	pr_info("dimming = 0x%x, brightness = %u\n", dimming, brightness);
 	if(dimming == HBM_OFF_DIMMING_OFF)
 	panel->dimming_enabled = false;
 	else if(dimming == HBM_OFF_DIMMING_ON)
