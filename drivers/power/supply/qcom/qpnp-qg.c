@@ -2336,7 +2336,7 @@ static int qg_charge_full_update(struct qpnp_qg *chip)
 			rc = qg_sdam_write(SDAM_SOC, chip->msoc);
 			if (rc < 0)
 				pr_err("WT Failed to update SDAM with MSOC rc=%d\n", rc);
-			pr_info("WT hold msoc 100% when charge done\n");
+			pr_info("WT hold msoc 100%% when charge done\n");
 #endif
 			qg_dbg(chip, QG_DEBUG_STATUS, "Setting charge_full (0->1) @ msoc=%d\n",
 					chip->msoc);
