@@ -259,11 +259,9 @@ struct smb5 {
 
 #ifdef CONFIG_MACH_XIAOMI_F9S
 extern void smb5_set_calling_current(struct smb_charger *chg);
-
-static int __debug_mask = PR_MISC | PR_INTERRUPT;
-#else
-static int __debug_mask;
 #endif
+
+static int __debug_mask;
 module_param_named(
 	debug_mask, __debug_mask, int, 0600
 );
