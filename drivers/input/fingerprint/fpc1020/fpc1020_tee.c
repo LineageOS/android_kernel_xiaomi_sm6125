@@ -58,7 +58,7 @@
 #define NUM_PARAMS_REG_ENABLE_SET 2
 #define PROC_NAME  "hwinfo"
 
-#define tyt_debug printk("tyt %s:%d\n",__func__,__LINE__) 
+#define tyt_debug printk("tyt %s:%d\n",__func__,__LINE__)
 static struct proc_dir_entry *proc_entry;
 extern int fpsensor;
 
@@ -517,8 +517,6 @@ static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
 {
 	struct fpc1020_data *fpc1020 = handle;
 
-	dev_dbg(fpc1020->dev, "%s\n", __func__);
-
 	if (atomic_read(&fpc1020->wakeup_enabled)) {
 		//wake_lock_timeout(&fpc1020->ttw_wl,
 		//			msecs_to_jiffies(FPC_TTW_HOLD_TIME));
@@ -530,7 +528,7 @@ static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
 		pr_info("fpc schedule_work enter\n");
 		fpc1020->wait_finger_down = false;
 		schedule_work(&fpc1020->work);
-	}  
+	}
 	return IRQ_HANDLED;
 }
 
