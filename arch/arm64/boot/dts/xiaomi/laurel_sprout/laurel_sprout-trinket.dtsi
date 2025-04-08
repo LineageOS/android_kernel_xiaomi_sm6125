@@ -1,0 +1,360 @@
+/*
+ * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/iio/qcom,spmi-vadc.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/clock/qcom,gcc-trinket.h>
+#include "../qcom-base/trinket-thermal-overlay.dtsi"
+#include "../qcom-base/trinket-sde-display.dtsi"
+#include "../qcom-base/trinket-audio-overlay.dtsi"
+#include "../qcom-base/trinket-camera-sensor-qrd.dtsi"
+
+#include "laurel_sprout-trinket-audio.dtsi"
+#include "laurel_sprout-trinket-camera.dtsi"
+#include "laurel_sprout-trinket-display.dtsi"
+#include "laurel_sprout-trinket-fingerprint.dtsi"
+#include "laurel_sprout-trinket-ir.dtsi"
+#include "laurel_sprout-trinket-memory.dtsi"
+#include "laurel_sprout-trinket-pinctrl.dtsi"
+#include "laurel_sprout-trinket-power.dtsi"
+#include "laurel_sprout-trinket-thermal.dtsi"
+#include "laurel_sprout-trinket-touchscreen.dtsi"
+#include "laurel_sprout-trinket-usb.dtsi"
+
+&qupv3_se1_i2c {
+	status = "ok";
+	#include "../qcom-base/smb1355.dtsi"
+};
+
+&soc {
+	mtp_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+		#include "../qcom-base/qg-batterydata-ascent-3450mah.dtsi"
+		#include "../qcom-base/qg-batterydata-mlp356477-2800mah.dtsi"
+		#include "battery/batterydata-wingtech-Sunwoda-4v4-4040mah.dtsi"
+		#include "battery/batterydata-wingtech-Feimaotui-4v4-4040mah.dtsi"
+		#include "battery/batterydata-wingtech-default-battery-4v4-4040mah.dtsi"
+	};
+
+	ts_vdd: gpio-regulator {
+		compatible = "regulator-gpio";
+		regulator-name = "ts_vdd-gpio-supply";
+		regulator-min-microvolt = <0000000>;
+		regulator-max-microvolt = <3300000>;
+		enable-gpio = <&tlmm 83 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		states = <3300000 0x0>;
+		regulator-type = "voltage";
+		startup-delay-us = <70000>;
+	};
+};
+
+&qupv3_se2_i2c {
+	status = "okay";
+
+	synaptics_tcm@20 {
+		compatible = "synaptics,tcm-i2c";
+		reg = <0x20>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <88 0x2008>;
+		pinctrl-names = "pmx_ts_active","pmx_ts_suspend",
+					"pmx_ts_release";
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+		pinctrl-2 = <&ts_release>;
+		synaptics,irq-gpio = <&tlmm 88 0x2008>;
+		synaptics,irq-on-state = <0>;
+		synaptics,reset-gpio = <&tlmm 87 0x00>;
+		synaptics,reset-on-state = <0>;
+		synaptics,reset-active-ms = <20>;
+		synaptics,reset-delay-ms = <200>;
+		synaptics,power-delay-ms = <200>;
+		synaptics,ubl-i2c-addr = <0x20>;
+		synaptics,y-flip;
+	};
+};
+
+&sdhc_1 {
+	vdd-supply = <&pm6125_l24>;
+	qcom,vdd-voltage-level = <2950000 2950000>;
+	qcom,vdd-current-level = <0 570000>;
+
+	vdd-io-supply = <&pm6125_l11>;
+	qcom,vdd-io-always-on;
+	qcom,vdd-io-lpm-sup;
+	qcom,vdd-io-voltage-level = <1800000 1800000>;
+	qcom,vdd-io-current-level = <0 325000>;
+
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on
+					&sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off
+					&sdc1_rclk_off>;
+
+	status = "ok";
+};
+
+&sdhc_2 {
+	vdd-supply = <&pm6125_l22>;
+	qcom,vdd-voltage-level = <2950000 2950000>;
+	qcom,vdd-current-level = <0 800000>;
+
+	vdd-io-supply = <&pm6125_l5>;
+	qcom,vdd-io-voltage-level = <1800000 2950000>;
+	qcom,vdd-io-current-level = <0 22000>;
+
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&sdc2_clk_on  &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+	cd-gpios = <&tlmm 98 GPIO_ACTIVE_HIGH>;
+
+	status = "ok";
+};
+
+&pmi632_gpios {
+	smb_en {
+		smb_en_default: smb_en_default {
+			pins = "gpio2";
+			function = "func1";
+			output-enable;
+		};
+	};
+
+	pmi632_sense {
+		/* GPIO 7 and 8 are external-sense pins for PMI632 */
+		pmi632_sense_default: pmi632_sense_default {
+			pins = "gpio7", "gpio8";
+			bias-high-impedance;	/* disable the GPIO */
+			bias-disable;		/* no-pull */
+		};
+	};
+
+	pmi632_ctm {
+		/* Disable GPIO1 for h/w base mitigation */
+		pmi632_ctm_default: pmi632_ctm_default {
+			pins = "gpio1";
+			bias-high-impedance;	/* disable the GPIO */
+			bias-disable;		/* no-pull */
+		};
+	};
+};
+
+&pm6125_gpios {
+	key_vol_up {
+		key_vol_up_default: key_vol_up_default {
+			pins = "gpio5";
+			function = "normal";
+			input-enable;
+			bias-pull-up;
+			power-source = <0>;
+		};
+	};
+};
+
+&soc {
+	gpio_keys {
+		compatible = "gpio-keys";
+		label = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&key_vol_up_default>;
+
+		vol_up {
+			label = "volume_up";
+			gpios = <&pm6125_gpios 5 GPIO_ACTIVE_LOW>;
+			linux,input-type = <1>;
+			linux,code = <KEY_VOLUMEUP>;
+			linux,can-disable;
+			debounce-interval = <15>;
+			gpio-key,wakeup;
+		};
+	};
+};
+
+&tlmm {
+	smb_int_default: smb_int_default {
+		mux {
+			pins = "gpio130";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio130";
+			bias-pull-up;
+			input-enable;
+		};
+	};
+};
+
+&smb1355 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&smb_int_default>;
+	interrupt-parent = <&tlmm>;
+	interrupts = <130 IRQ_TYPE_LEVEL_LOW>;
+	status = "ok";
+};
+
+&smb1355_charger {
+	pinctrl-names = "default";
+	pinctrl-0 = <&smb_en_default &pmi632_sense_default &pmi632_ctm_default>;
+	qcom,parallel-mode = <1>;
+	qcom,disable-ctm;
+	qcom,hw-die-temp-mitigation;
+	status = "ok";
+};
+
+&ufsphy_mem {
+	compatible = "qcom,ufs-phy-qmp-v3-660";
+
+	vdda-phy-supply = <&pm6125_l4>; /* 0.9v */
+	vdda-pll-supply = <&pm6125_l10>; /* 1.8v */
+	vdda-phy-max-microamp = <51400>;
+	vdda-pll-max-microamp = <14200>;
+
+	status = "ok";
+};
+
+&ufshc_mem {
+	vdd-hba-supply = <&ufs_phy_gdsc>;
+	vdd-hba-fixed-regulator;
+	vcc-supply = <&pm6125_l24>;
+	vcc-voltage-level = <2950000 2960000>;
+	vccq2-supply = <&pm6125_l11>;
+	vcc-max-microamp = <600000>;
+	vccq2-max-microamp = <600000>;
+
+	qcom,vddp-ref-clk-supply = <&pm6125_l18>;
+	qcom,vddp-ref-clk-max-microamp = <100>;
+	qcom,vddp-ref-clk-min-uV = <1200000>;
+	qcom,vddp-ref-clk-max-uV = <1232000>;
+
+	status = "ok";
+};
+
+&pmi632_vadc {
+	bat_therm {
+		qcom,lut-index = <0>;
+	};
+
+	bat_therm_30k {
+		qcom,lut-index = <0>;
+	};
+
+	bat_therm_400k {
+		qcom,lut-index = <0>;
+	};
+};
+
+&usb0 {
+	extcon = <&pmi632_charger>, <&eud>;
+};
+
+&dsi_td4330_truly_cmd {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+	pwms = <&pm6125_pwm 0 0>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_pwm";
+	qcom,bl-pmic-pwm-period-usecs = <100>;
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,mdss-dsi-bl-default-level = <102>;
+	qcom,platform-te-gpio = <&tlmm 89 0>;
+	qcom,platform-reset-gpio = <&tlmm 90 0>;
+};
+
+
+&pm6125_pwm {
+	status = "ok";
+};
+
+&qusb_phy0 {
+	qcom,qusb-phy-init-seq = <0xc8 0x80
+							  0x33 0x84
+							  0x83 0x88
+							  0xc7 0x8c
+							  0x30 0x08
+							  0x79 0x0c
+							  0x21 0x10
+							  0x14 0x9c
+							  0x80 0x04
+							  0x9f 0x1c
+							  0x00 0x18>;
+};
+
+&soc {
+	sn_fuse: snfuse@0x1B46134 {
+		compatible = "qcom,sn-fuse";
+		reg = <0x1B46134 0x4>;
+		reg-names = "sn-base";
+	};
+
+	sec_boot_fuse: secbootfuse@0x1B40458 {
+		compatible = "qcom,sec-boot-fuse";
+		reg = <0x1B40458  0x4>;
+		reg-names = "sec-boot-base";
+	};
+
+	cpu_feature_id: cpufeatureid@0x01B44180 {
+		compatible = "qcom,cpu-feature-id";
+		reg = <0x01B44180  0x4>;
+		reg-names = "cpu-feature-id";
+	};
+
+	qcom,msm-imem@c125000 {
+		wt_reset_reason_addr@fe4 {
+			compatible = "qcom,msm-imem-wt_reset_reason_addr";
+			reg = <0xfe4 4>;
+		};
+		tz_reset_reason_addr@7a4 {
+			compatible = "qcom,msm-imem-tz_reset_reason_addr";
+			reg = <0x7a4 4>;
+		};
+	};
+
+	qcom,rmtfs_sharedmem@0 {
+		/delete-property/ qcom,vm-nav-path;
+	};
+};
+
+&wdog {
+	qcom,bark-time = <15000>;
+	qcom,pet-time = <8000>;
+};
+
+&qcom_seecom {
+	reg = <0x46d00000 0x3E00000>;
+};
+
+&qcom_smcinvoke {
+	reg = <0x46d00000 0x3E00000>;
+};
+
+&firmware {
+	android {
+		compatible = "android,firmware";
+		vbmeta {
+			compatible = "android,vbmeta";
+			parts = "vbmeta,boot,system,vendor,dtbo";
+		};
+		fstab {
+			compatible = "android,fstab";
+			vendor {
+				compatible = "android,vendor";
+				dev = "/dev/block/platform/soc/4804000.ufshc/by-name/vendor";
+				type = "ext4";
+				mnt_flags = "ro,barrier=1,discard";
+				fsmgr_flags = "wait,slotselect,avb";
+				status = "ok";
+			};
+		};
+	};
+};
