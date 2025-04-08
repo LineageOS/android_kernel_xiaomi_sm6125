@@ -5909,8 +5909,8 @@ CONFIG_SBITMAP=y
 #
 # Xiaomi configuration options
 #
-# CONFIG_MACH_XIAOMI is not set
-# CONFIG_MACH_XIAOMI_TRINKET is not set
+CONFIG_MACH_XIAOMI=y
+CONFIG_MACH_XIAOMI_TRINKET=y
 
 #
 # Xiaomi board selection
