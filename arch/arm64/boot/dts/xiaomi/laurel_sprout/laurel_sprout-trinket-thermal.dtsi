@@ -1,0 +1,46 @@
+&soc {
+    quiet-therm-step {
+        trips {
+            batt_trip0 {
+                temperature = <38000>;
+            };
+            gold_trip {
+                temperature = <50000>;
+            };
+            batt_trip1 {
+                temperature = <41000>;
+            };
+            batt_trip2 {
+                temperature = <44000>;
+            };
+            batt_trip4 {
+                temperature = <49000>;
+            };
+            modem_trip0 {
+                temperat0ure = <74000>;
+            };
+            modem_trip1 {
+                temperat0ure = <76000>;
+            };
+            modem_trip2 {
+                temperature = <78000>;
+            };
+            modem_trip3 {
+                temperature = <90000>;
+            };
+        };
+        cooling-maps {
+            battery_lvl2 {
+                cooling-device = <&pmi632_charger 3 3>;
+            };
+            battery_lvl3 {
+                trip = <&skin_gpu_trip>;
+                cooling-device = <&pmi632_charger 4 4>;
+            };
+            battery_lvl4 {
+                trip = <&batt_trip4>;
+                cooling-device = <&pmi632_charger 5 5>;
+            };
+        };
+    };
+};

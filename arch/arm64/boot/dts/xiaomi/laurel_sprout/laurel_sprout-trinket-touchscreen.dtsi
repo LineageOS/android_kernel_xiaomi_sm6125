@@ -1,0 +1,58 @@
+&qupv3_se2_i2c {
+    goodix_i2c@5d {
+        compatible = "goodix,gt9883";
+        reg = <0x5d>;
+        status = "ok";
+        interrupt-parent = <&tlmm>;
+        interrupts = <88 0x2800>;
+        vtouch-supply = <&ts_vdd>;
+        pinctrl-names = "pmx_ts_active","pmx_ts_suspend";
+        pinctrl-0 = <&ts_int_active &ts_reset_active>;
+        pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+        goodix,reset-gpio = <&tlmm 87 0x0>;
+        goodix,irq-gpio = <&tlmm 88 0x2800>;
+        goodix,irq-flags = <2>; /* 1:trigger rising, 2:trigger falling;*/
+        goodix,panel-max-id = <10>;
+        goodix,panel-max-x = <720>;
+        goodix,panel-max-y = <1560>;
+        goodix,panel-max-w = <512>;
+        goodix,panel-max-p = <512>;
+        goodix,power-on-delay-us = <300000>; /*300ms*/
+        goodix,power-off-delay-us = <5000>;
+        touchpanel,rst-gpio = <&tlmm 87 0x0>;
+        touchpanel,irq-gpio = <&tlmm 88 0x0>;
+        touchpanel,open_short_not_use_fw;
+        /*goodix,swap-axis;*/
+        goodix,x2x;
+        goodix,y2y;
+        sensor1 {
+            normal-cfg = [];
+        };
+    };
+
+    focaltech@38{
+        compatible = "focaltech,ft3518";
+        reg = <0x38>;
+        interrupt-parent = <&tlmm>;
+        interrupts = <88 0x02>;
+        vdd-supply = <&ts_vdd>;
+        focaltech,reset-gpio = <&tlmm 87 0x01>;
+        focaltech,irq-gpio = <&tlmm 88 0x02>;
+        focaltech,max-touch-number = <10>;
+        focaltech,display-coords =  <0 0 720 1560>;
+
+        pinctrl-names = "pmx_ts_active","pmx_ts_suspend","pmx_ts_release";
+        pinctrl-0 = <&ts_int_active &ts_reset_active>;
+        pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+        pinctrl-2 = <&ts_release>;
+
+        focaltech,have-key;
+        focaltech,key-number = <3>;
+        focaltech,keys = <139 102 158>;
+        focaltech,key-x-coords = <200 600 800>;
+        focaltech,key-y-coords = <2000 2000 2000>;
+        touchpanel,rst-gpio = <&tlmm 87 0x0>;
+        touchpanel,irq-gpio = <&tlmm 88 0x0>;
+        touchpanel,open_short_not_use_fw;
+    };
+};
