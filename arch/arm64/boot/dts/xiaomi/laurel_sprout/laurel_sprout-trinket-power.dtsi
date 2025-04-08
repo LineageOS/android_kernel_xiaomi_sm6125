@@ -1,0 +1,44 @@
+#include <dt-bindings/input/qcom,qpnp-power-on.h>
+
+&spmi_bus {
+	qcom,pm6125@0 {
+		qcom,power-on@800 {
+			qcom,s3-debounce = <32>;
+			qcom,s3-src = "kpdpwr-and-resin";
+			qcom,pon_1 {
+				qcom,support-reset = <1>;
+				qcom,s1-timer = <4480>;
+				qcom,s2-timer = <2000>;
+				qcom,s2-type = <PON_POWER_OFF_TYPE_HARD_RESET>;
+			};
+			qcom,pon_3 {
+				qcom,pon-type = <3>;
+				qcom,support-reset = <1>;
+				qcom,s1-timer = <3072>;
+				qcom,s2-timer = <2000>;
+				qcom,s2-type = <1>;
+				qcom,pull-up = <1>;
+			};
+		};
+	};
+	pmi632_3 {
+		flash_led {
+			pmi632_flash0 {
+				qcom,max-current = <1200>;
+				qcom,current-ma = <1100>;
+			};
+			pmi632_torch0 {
+				qcom,max-current = <950>;
+				qcom,current-ma = <900>;
+			};
+		};
+	};
+};
+
+&thermal_zones {
+	soc {
+		trips {
+			temperature = <5>;
+		};
+	};
+};

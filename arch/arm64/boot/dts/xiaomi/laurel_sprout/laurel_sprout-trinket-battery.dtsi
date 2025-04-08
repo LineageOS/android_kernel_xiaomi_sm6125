@@ -1,0 +1,33 @@
+&pmi632_qg {
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,s2-fifo-length = <4>;
+	qcom,qg-iterm-ma = <330>;
+	qcom,hold-soc-while-full;
+	qcom,shutdown-temp-diff = <100>; /* 10 degrees C */
+	qcom,ignore-shutdown-soc-secs = <2592000>; /* One month */
+	qcom,shutdown_soc_threshold = <40>; /*40%*/
+	qcom,linearize-soc;
+	qcom,qg-use-s7-ocv;
+};
+
+&pmi632_charger {
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,suspend-input-on-debug-batt;
+	qcom,sw-jeita-enable;
+	/* SMB1355 only */
+	qcom,sec-charger-config = <2>;
+	dpdm-supply = <&qusb_phy0>;
+	qcom,charger-temp-max = <800>;
+	qcom,smb-temp-max = <800>;
+	qcom,fcc-max-ua = <3000000>;
+	qcom,fv-max-uv = <4400000>;
+	qcom,auto-recharge-soc = <99>;
+	qcom,usb-icl-ua = <2000000>;
+	qcom,chg-term-current-ma = <(-200)>;
+	qcom,chg-term-src = <1>;
+	qcom,flash-disable-soc = <0>;
+	qcom,connector-internal-pull-kohm = <100>;
+	qcom,float-option = <1>;
+	qcom,thermal-mitigation = <3000000
+			2500000 2000000 1500000 1000000 500000>;
+};

@@ -1,0 +1,11 @@
+&soc {
+	/delete-node/ fingerprint;
+	goodix_fp {
+		compatible = "goodix,fingerprint";
+		interrupt-parent = <&tlmm>;
+		interrupt = <92 0x0>;
+		fp-gpio-irq = <&tlmm 92 0x00>;
+		fp-gpio-reset = <&tlmm 93 0x00>;
+		status = "okay";
+	};
+};
