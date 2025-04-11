@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1d031b6c_f3e44bd8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 31655
+      },
+      "writtenOn": "2025-04-11T22:03:59Z",
+      "side": 1,
+      "message": "depends on: https://review.lineageos.org/q/topic:sm8150-uclamp",
+      "revId": "db8c11d2ad665a5bf754685dd5957fca8c7e286b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
