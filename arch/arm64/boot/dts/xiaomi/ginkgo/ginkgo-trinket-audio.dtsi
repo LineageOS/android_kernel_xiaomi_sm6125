@@ -47,8 +47,6 @@
 		"WSA_SPK2 OUT", "VA_MCLK";
 	qcom,pri-mi2s-gpios = <&cdc_pri_mi2s_gpios>;
     qcom,wsa-max-devs = <0>;
-	/delete-property/ qcom,cdc-dmic01-gpios;
-    /delete-property/ qcom,cdc-dmic23-gpios;
     /delete-property/ qcom,wsa-devs;
 };
 
@@ -97,14 +95,6 @@
 	};
 };
 
-&cdc_dmic01_gpios {
-    status = "disabled";
-};
-
-&cdc_dmic23_gpios {
-    status = "disabled";
-};
-
 &wsa_swr_gpios {
     status = "disabled";
 };
@@ -135,5 +125,5 @@
 
 &dai_mi2s2 {
 	qcom,msm-mi2s-rx-lines = <1>;
-	qcom,msm-mi2s-tx-lines = <2>;	
+	qcom,msm-mi2s-tx-lines = <2>;
 };
