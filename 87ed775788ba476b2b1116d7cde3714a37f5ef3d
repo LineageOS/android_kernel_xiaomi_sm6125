@@ -16,6 +16,24 @@
       "message": "Common Lineage HAL properly supports two LEDs groups",
       "revId": "87ed775788ba476b2b1116d7cde3714a37f5ef3d",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "548dfa28_e4fd88a9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 31655
+      },
+      "writtenOn": "2025-04-22T12:49:47Z",
+      "side": 1,
+      "message": "I just tried reverting this, and it didn\u0027t work for me. I\u0027m using `android.hardware.light-service.lineage\n`. When I boot up with this patch, LED light immediately lights up, without it - it\u0027s turned off (both times charging). I believe the light HAL treats it as an RgbLedDevice instead of just a LedDevice. And because the two other nodes are not working at all, it doesnt light up (3 nodes exist but only the `red` one is the working one that controls the brightness of the LED).",
+      "parentUuid": "e26cfc20_195a5d4a",
+      "revId": "87ed775788ba476b2b1116d7cde3714a37f5ef3d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
