@@ -34,6 +34,24 @@
       "parentUuid": "e26cfc20_195a5d4a",
       "revId": "87ed775788ba476b2b1116d7cde3714a37f5ef3d",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6a505174_8fdb0f47",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 25732
+      },
+      "writtenOn": "2025-04-23T12:48:39Z",
+      "side": 1,
+      "message": "If your LED is only white, then fix your devicetree definition, you can set the LED name there",
+      "parentUuid": "548dfa28_e4fd88a9",
+      "revId": "87ed775788ba476b2b1116d7cde3714a37f5ef3d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
