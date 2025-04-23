@@ -483,7 +483,7 @@ static ssize_t irq_ack(struct device *dev,
 {
 	struct fpc1020_data *fpc1020 = dev_get_drvdata(dev);
 
-	dev_dbg(fpc1020->dev, "%s\n", __func__);
+	//dev_dbg(fpc1020->dev, "%s\n", __func__);
 	//pr_info( "%s\n", __func__);
 
 	return count;
