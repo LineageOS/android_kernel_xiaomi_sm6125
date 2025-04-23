@@ -24,6 +24,7 @@
 #include "laurel_sprout-trinket-display.dtsi"
 #include "laurel_sprout-trinket-fingerprint.dtsi"
 #include "laurel_sprout-trinket-ir.dtsi"
+#include "laurel_sprout-trinket-led.dtsi"
 #include "laurel_sprout-trinket-memory.dtsi"
 #include "laurel_sprout-trinket-pinctrl.dtsi"
 #include "laurel_sprout-trinket-power.dtsi"
