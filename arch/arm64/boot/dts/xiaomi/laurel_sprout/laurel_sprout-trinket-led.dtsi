@@ -1,0 +1,11 @@
+&pmi632_rgb {
+	red {
+		label = "white";
+	};
+	green {
+		status="disabled";
+	};
+	blue {
+		status="disabled";
+	};
+};
