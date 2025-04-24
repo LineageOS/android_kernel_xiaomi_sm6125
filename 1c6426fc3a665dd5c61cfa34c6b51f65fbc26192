@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7314517b_1acc7852",
+        "filename": "techpack/audio/asoc/codecs/Kbuild",
+        "patchSetId": 8
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 32674
+      },
+      "writtenOn": "2025-04-24T10:04:09Z",
+      "side": 1,
+      "message": "There is another reference of bolero under wcd937x.",
+      "revId": "1c6426fc3a665dd5c61cfa34c6b51f65fbc26192",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
