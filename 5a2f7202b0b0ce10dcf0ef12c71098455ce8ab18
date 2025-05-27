@@ -22,6 +22,23 @@
       },
       "revId": "5a2f7202b0b0ce10dcf0ef12c71098455ce8ab18",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ea9c533_373c5a8f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2025-05-27T10:11:00Z",
+      "side": 1,
+      "message": "This will go through qcom_sm8150 \u0026 cleaned up",
+      "revId": "5a2f7202b0b0ce10dcf0ef12c71098455ce8ab18",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
