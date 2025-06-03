@@ -207,13 +207,7 @@ struct drm_device {
 	/*@} */
 	int switch_power_state;
 
-#ifdef CONFIG_MACH_XIAOMI_F9S
 	int sde_power_mode;
-	int pre_sde_power_mode;
-#endif
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	int doze_state;
-#endif
 };
 
 #endif

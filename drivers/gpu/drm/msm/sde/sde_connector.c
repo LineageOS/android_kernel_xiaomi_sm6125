@@ -24,10 +24,6 @@
 #include "sde_crtc.h"
 #include "sde_rm.h"
 
-#ifdef CONFIG_MACH_XIAOMI_C3J
-extern char *saved_command_line;
-#endif
-
 #define BL_NODE_NAME_SIZE 32
 #ifdef CONFIG_MACH_XIAOMI_F9S
 #define LIMIT_PANEL_ERROR_MAX_TIMES 15
@@ -1172,20 +1168,9 @@ static int sde_connector_atomic_set_property(struct drm_connector *connector,
 	idx = msm_property_index(&c_conn->property_info, property);
 	switch (idx) {
 	case CONNECTOR_PROP_LP:
-#ifdef CONFIG_MACH_XIAOMI_F9S
 		if (connector->dev)
 			connector->dev->sde_power_mode = val;
 		break;
-#endif
-#ifdef CONFIG_MACH_XIAOMI_C3J
-		if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-		    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL)) {
-			if (connector->dev)
-				connector->dev->doze_state = val;
-			break;
-		}
-		break;
-#endif
 	case CONNECTOR_PROP_OUT_FB:
 		/* clear old fb, if present */
 		if (c_state->out_fb)

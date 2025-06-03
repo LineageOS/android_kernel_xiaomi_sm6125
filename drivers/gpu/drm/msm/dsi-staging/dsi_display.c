@@ -18,7 +18,11 @@
 #include <linux/of.h>
 #include <linux/of_gpio.h>
 #include <linux/err.h>
+#ifdef CONFIG_MACH_XIAOMI_F9S
+#include <linux/hardware_info.h>
 #include <linux/kernfs.h>
+#endif
+#include <linux/msm_drm_notify.h>
 
 #include "msm_drv.h"
 #include "sde_connector.h"
@@ -33,9 +37,6 @@
 #include "sde_dbg.h"
 #include "dsi_parser.h"
 #include "dsi_phy.h"
-#include <linux/msm_drm_notify.h>
-#include <linux/notifier.h>
-#include <linux/hardware_info.h>
 
 #define to_dsi_display(x) container_of(x, struct dsi_display, host)
 #define INT_BASE_10 10
@@ -59,7 +60,6 @@ extern char g_lcd_id[128];
 #endif
 
 extern int backlight_hbm_set(int hbm_mode);
-extern char *saved_command_line;
 #endif
 
 DEFINE_MUTEX(dsi_display_clk_mutex);
@@ -1689,91 +1689,30 @@ int dsi_display_set_power(struct drm_connector *connector,
 {
 	struct dsi_display *display = disp;
 	int rc = 0;
-	struct drm_device *dev = NULL;
-#ifdef CONFIG_MACH_XIAOMI_F9S
 	struct msm_drm_notifier notify_data;
-#endif
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	struct drm_notify_data g_notify_data;
-	int event = 0;
-#endif
 
 	if (!display || !display->panel) {
 		pr_err("invalid display/panel\n");
 		return -EINVAL;
 	}
 
-#ifdef CONFIG_MACH_XIAOMI_F9S
-	if (!connector || !connector->dev) {
-		pr_err("invalid connector or dev ptr\n");
-		return -EINVAL;
-	} else {
-		dev = connector->dev;
-	}
-#endif
-
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-	    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL)) {
-		if (!connector || !connector->dev) {
-			pr_err("invalid connector/dev\n");
-			return -EINVAL;
-		} else {
-			dev = connector->dev;
-			event = dev->doze_state;
-		}
-		g_notify_data.data = &event;
-	}
-#endif
-
-#ifdef CONFIG_MACH_XIAOMI_F9S
 	notify_data.data = &power_mode;
 	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
-#endif
 
 	switch (power_mode) {
 	case SDE_MODE_DPMS_LP1:
-#ifdef CONFIG_MACH_XIAOMI_F9S
 		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
 					    &notify_data);
 		rc = dsi_panel_set_lp1(display->panel);
 		msm_drm_notifier_call_chain(MSM_DRM_EVENT_BLANK, &notify_data);
-#else
-#ifdef CONFIG_MACH_XIAOMI_C3J
-		if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-		    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL))
-			drm_notifier_call_chain(DRM_EARLY_EVENT_BLANK, &g_notify_data);
-#endif
-		rc = dsi_panel_set_lp1(display->panel);
-#ifdef CONFIG_MACH_XIAOMI_C3J
-		if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-		    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL))
-			drm_notifier_call_chain(DRM_EVENT_BLANK, &g_notify_data);
-#endif
-#endif
 		break;
 	case SDE_MODE_DPMS_LP2:
-#ifdef CONFIG_MACH_XIAOMI_F9S
 		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
 					    &notify_data);
 		rc = dsi_panel_set_lp2(display->panel);
 		msm_drm_notifier_call_chain(MSM_DRM_EVENT_BLANK, &notify_data);
-#else
-#ifdef CONFIG_MACH_XIAOMI_C3J
-		if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-		    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL))
-			drm_notifier_call_chain(DRM_EARLY_EVENT_BLANK, &g_notify_data);
-#endif
-		rc = dsi_panel_set_lp2(display->panel);
-#ifdef CONFIG_MACH_XIAOMI_C3J
-		if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-		    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL))
-			drm_notifier_call_chain(DRM_EVENT_BLANK, &g_notify_data);
-#endif
-#endif
 		break;
 	case SDE_MODE_DPMS_ON:
-#ifdef CONFIG_MACH_XIAOMI_F9S
 		if (display->panel->power_mode == SDE_MODE_DPMS_LP1 ||
 			display->panel->power_mode == SDE_MODE_DPMS_LP2) {
 			msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
@@ -1782,22 +1721,6 @@ int dsi_display_set_power(struct drm_connector *connector,
 			msm_drm_notifier_call_chain(MSM_DRM_EVENT_BLANK,
 						    &notify_data);
 		}
-#else
-		if (display->panel->power_mode == SDE_MODE_DPMS_LP1 ||
-			display->panel->power_mode == SDE_MODE_DPMS_LP2) {
-#ifdef CONFIG_MACH_XIAOMI_C3J
-			if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-			    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL))
-				drm_notifier_call_chain(DRM_EARLY_EVENT_BLANK, &g_notify_data);
-#endif
-			rc = dsi_panel_set_nolp(display->panel);
-#ifdef CONFIG_MACH_XIAOMI_C3J
-			if ((strnstr(saved_command_line, "tianma", strlen(saved_command_line)) != NULL) ||
-			    (strnstr(saved_command_line, "shenchao", strlen(saved_command_line)) != NULL))
-				drm_notifier_call_chain(DRM_EVENT_BLANK, &g_notify_data);
-#endif
-		}
-#endif
 		break;
 	case SDE_MODE_DPMS_OFF:
 	default:
