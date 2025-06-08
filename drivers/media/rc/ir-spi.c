@@ -37,7 +37,8 @@ struct ir_spi_data {
 	u8 duty_cycle;
 	bool negated;
 
-	u16 tx_buf[IR_SPI_MAX_BUFSIZE];
+	u16 *tx_buf;
+	size_t tx_len;
 	u16 pulse;
 	u16 space;
 
@@ -45,6 +46,28 @@ struct ir_spi_data {
 	struct spi_device *spi;
 	struct regulator *regulator;
 };
+
+static int ir_buf_realloc(struct ir_spi_data *idata, size_t len)
+{
+	u16 *tx_buf;
+
+	if (len <= idata->tx_len)
+		return 0;
+
+	len = max(len, idata->tx_len + IR_SPI_MAX_BUFSIZE);
+
+	tx_buf = devm_kcalloc(&idata->spi->dev, len, sizeof(*idata->tx_buf),
+			      GFP_KERNEL);
+	if (!tx_buf)
+		return -ENOMEM;
+
+	devm_kfree(&idata->spi->dev, idata->tx_buf);
+
+	idata->tx_buf = tx_buf;
+	idata->tx_len = len;
+
+	return 0;
+}
 
 static int ir_spi_tx(struct rc_dev *dev,
 		     unsigned int *buffer, unsigned int count)
@@ -63,8 +86,9 @@ static int ir_spi_tx(struct rc_dev *dev,
 
 		periods = DIV_ROUND_CLOSEST(buffer[i] * idata->freq, 1000000);
 
-		if (len + periods >= IR_SPI_MAX_BUFSIZE)
-			return -EINVAL;
+		ret = ir_buf_realloc(idata, len + periods);
+		if (ret)
+			return ret;
 
 		/*
 		 * the first value in buffer is a pulse, so that 0, 2, 4, ...
@@ -173,6 +197,10 @@ static int ir_spi_probe(struct spi_device *spi)
 	ir_spi_set_duty_cycle(idata->rc, dc);
 
 	idata->freq = IR_SPI_DEFAULT_FREQUENCY;
+
+	ret = ir_buf_realloc(idata, IR_SPI_MAX_BUFSIZE);
+	if (ret)
+		return ret;
 
 	return devm_rc_register_device(&spi->dev, idata->rc);
 }
