@@ -90,13 +90,7 @@ struct spidev_data {
 static LIST_HEAD(device_list);
 static DEFINE_MUTEX(device_list_lock);
 
-#ifdef CONFIG_MACH_XIAOMI_F9S
-static unsigned bufsiz = 512 * 4096;
-#elif defined (CONFIG_MACH_XIAOMI_C3J)
-static unsigned bufsiz = 10 * 4096;
-#else
 static unsigned bufsiz = 4096;
-#endif
 module_param(bufsiz, uint, S_IRUGO);
 MODULE_PARM_DESC(bufsiz, "data bytes in biggest supported SPI message");
 
@@ -129,13 +123,7 @@ spidev_sync_write(struct spidev_data *spidev, size_t len)
 	struct spi_transfer	t = {
 			.tx_buf		= spidev->tx_buffer,
 			.len		= len,
-#if defined (CONFIG_MACH_XIAOMI_F9S) || defined (CONFIG_MACH_XIAOMI_C3J)
-			.delay_usecs	= 0,
-			.cs_change	= 0,
-			.speed_hz	= 960000,
-#else
 			.speed_hz	= spidev->speed_hz,
-#endif
 		};
 	struct spi_message	m;
 
@@ -175,16 +163,6 @@ spidev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 	spidev = filp->private_data;
 
 	mutex_lock(&spidev->buf_lock);
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	if (!spidev->rx_buffer) {
-		spidev->rx_buffer = kmalloc(bufsiz, GFP_KERNEL);
-		if (!spidev->rx_buffer) {
-			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
-			status = -ENOMEM;
-			goto read_unlock;
-		}
-	}
-#endif
 	status = spidev_sync_read(spidev, count);
 	if (status > 0) {
 		unsigned long	missing;
@@ -195,12 +173,6 @@ spidev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 		else
 			status = status - missing;
 	}
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	kfree(spidev->rx_buffer);
-	spidev->rx_buffer = NULL;
-
-read_unlock:
-#endif
 	mutex_unlock(&spidev->buf_lock);
 
 	return status;
@@ -215,36 +187,18 @@ spidev_write(struct file *filp, const char __user *buf,
 	ssize_t			status = 0;
 	unsigned long		missing;
 
-#ifndef CONFIG_MACH_XIAOMI_C3J
 	/* chipselect only toggles at start or end of operation */
 	if (count > bufsiz)
 		return -EMSGSIZE;
-#endif
 
 	spidev = filp->private_data;
 
 	mutex_lock(&spidev->buf_lock);
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	if (!spidev->tx_buffer) {
-		spidev->tx_buffer = kmalloc(count, GFP_KERNEL);
-		if (!spidev->tx_buffer) {
-			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
-			status = -ENOMEM;
-			goto write_unlock;
-		}
-	}
-#endif
 	missing = copy_from_user(spidev->tx_buffer, buf, count);
 	if (missing == 0)
 		status = spidev_sync_write(spidev, count);
 	else
 		status = -EFAULT;
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	kfree(spidev->tx_buffer);
-	spidev->tx_buffer = NULL;
-
-write_unlock:
-#endif
 	mutex_unlock(&spidev->buf_lock);
 
 	return status;
@@ -270,25 +224,6 @@ static int spidev_message(struct spidev_data *spidev,
 	 * We walk the array of user-provided transfers, using each one
 	 * to initialize a kernel version of the same transfer.
 	 */
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	if (!spidev->rx_buffer) {
-		spidev->rx_buffer = kmalloc(bufsiz, GFP_KERNEL);
-		if (!spidev->rx_buffer) {
-			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
-			status = -ENOMEM;
-			goto rxbuffer_err;
-		}
-	}
-
-	if (!spidev->tx_buffer) {
-		spidev->tx_buffer = kmalloc(bufsiz, GFP_KERNEL);
-		if (!spidev->tx_buffer) {
-			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
-			status = -ENOMEM;
-			goto txbuffer_err;
-		}
-	}
-#endif
 	tx_buf = spidev->tx_buffer;
 	rx_buf = spidev->rx_buffer;
 	total = 0;
@@ -382,14 +317,6 @@ static int spidev_message(struct spidev_data *spidev,
 	status = total;
 
 done:
-#ifdef CONFIG_MACH_XIAOMI_C3J
-	kfree(spidev->tx_buffer);
-	spidev->tx_buffer = NULL;
-txbuffer_err:
-	kfree(spidev->rx_buffer);
-	spidev->rx_buffer = NULL;
-rxbuffer_err:
-#endif
 	kfree(k_xfers);
 	return status;
 }
@@ -649,11 +576,6 @@ static int spidev_open(struct inode *inode, struct file *filp)
 		goto err_find_dev;
 	}
 
-#ifdef CONFIG_MACH_XIAOMI_F9S
-	memset(spidev->tx_buffer, 0, bufsiz);
-	memset(spidev->rx_buffer, 0, bufsiz);
-#else
-#ifndef CONFIG_MACH_XIAOMI_C3J
 	if (!spidev->tx_buffer) {
 		spidev->tx_buffer = kmalloc(bufsiz, GFP_KERNEL);
 		if (!spidev->tx_buffer) {
@@ -671,8 +593,6 @@ static int spidev_open(struct inode *inode, struct file *filp)
 			goto err_alloc_rx_buf;
 		}
 	}
-#endif
-#endif
 
 	spidev->users++;
 	filp->private_data = spidev;
@@ -681,11 +601,9 @@ static int spidev_open(struct inode *inode, struct file *filp)
 	mutex_unlock(&device_list_lock);
 	return 0;
 
-#if !defined (CONFIG_MACH_XIAOMI_F9S) && !defined (CONFIG_MACH_XIAOMI_C3J)
 err_alloc_rx_buf:
 	kfree(spidev->tx_buffer);
 	spidev->tx_buffer = NULL;
-#endif
 err_find_dev:
 	mutex_unlock(&device_list_lock);
 	return status;
@@ -708,24 +626,12 @@ static int spidev_release(struct inode *inode, struct file *filp)
 	/* last close? */
 	spidev->users--;
 	if (!spidev->users) {
-#ifdef CONFIG_MACH_XIAOMI_F9S
-		spin_lock_irq(&spidev->spi_lock);
-		if (spidev->spi)
-			spidev->speed_hz = spidev->spi->max_speed_hz;
-
-		/* ... after we unbound from the underlying device? */
-		dofree = (spidev->spi == NULL);
-		spin_unlock_irq(&spidev->spi_lock);
-#else
-#ifndef CONFIG_MACH_XIAOMI_C3J
 
 		kfree(spidev->tx_buffer);
 		spidev->tx_buffer = NULL;
 
 		kfree(spidev->rx_buffer);
 		spidev->rx_buffer = NULL;
-#endif
-#endif
 
 		if (dofree)
 			kfree(spidev);
@@ -866,27 +772,6 @@ static int spidev_probe(struct spi_device *spi)
 		set_bit(minor, minors);
 		list_add(&spidev->device_entry, &device_list);
 	}
-
-#ifdef CONFIG_MACH_XIAOMI_F9S
-	if (!spidev->tx_buffer) {
-		spidev->tx_buffer = kmalloc(bufsiz, GFP_KERNEL);
-		if (!spidev->tx_buffer) {
-			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
-			status = -ENOMEM;
-			goto err_find_dev;
-		}
-	}
-
-	if (!spidev->rx_buffer) {
-		spidev->rx_buffer = kmalloc(bufsiz, GFP_KERNEL);
-		if (!spidev->rx_buffer) {
-			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
-			status = -ENOMEM;
-			goto err_alloc_rx_buf;
-		}
-	}
-#endif
-
 	mutex_unlock(&device_list_lock);
 
 	spidev->speed_hz = spi->max_speed_hz;
@@ -894,24 +779,9 @@ static int spidev_probe(struct spi_device *spi)
 	if (status == 0)
 		spi_set_drvdata(spi, spidev);
 	else
-#ifdef CONFIG_MACH_XIAOMI_F9S
-		goto err_dev_status;
-#else
 		kfree(spidev);
-#endif
-	return status;
-
-#ifdef CONFIG_MACH_XIAOMI_F9S
-err_dev_status:
-	kfree(spidev);
-err_alloc_rx_buf:
-	kfree(spidev->tx_buffer);
-	spidev->tx_buffer = NULL;
-err_find_dev:
-	mutex_unlock(&device_list_lock);
 
 	return status;
-#endif
 }
 
 static int spidev_remove(struct spi_device *spi)
@@ -922,14 +792,6 @@ static int spidev_remove(struct spi_device *spi)
 	mutex_lock(&device_list_lock);
 	/* make sure ops on existing fds can abort cleanly */
 	spin_lock_irq(&spidev->spi_lock);
-#ifdef CONFIG_MACH_XIAOMI_F9S
-	kfree(spidev->tx_buffer);
-	spidev->tx_buffer = NULL;
-
-	kfree(spidev->rx_buffer);
-	spidev->rx_buffer = NULL;
-#endif
-
 	spidev->spi = NULL;
 	spin_unlock_irq(&spidev->spi_lock);
 
