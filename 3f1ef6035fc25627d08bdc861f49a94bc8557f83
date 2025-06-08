@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "31f0037c_ca77289d",
+        "filename": "drivers/spi/spi-geni-qcom.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 25732
+      },
+      "writtenOn": "2025-06-08T21:27:41Z",
+      "side": 0,
+      "message": "fyi I have this change on Xiaomi SM8150 as well, but IR changes weren\u0027t included, you sure our hw doesn\u0027t actually require a larger timeout value?\n\nhttps://review.lineageos.org/c/LineageOS/android_kernel_qcom_sm8150/+/374556",
+      "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
