@@ -30,7 +30,11 @@
 
 #define IR_SPI_DEFAULT_FREQUENCY	38000
 #define IR_SPI_BIT_PER_WORD		    8
-#define IR_SPI_MAX_BUFSIZE		 4096
+#ifdef CONFIG_MACH_XIAOMI_F9S
+#define IR_SPI_MAX_BUFSIZE		 4096*512
+#elif defined(CONFIG_MACH_XIAOMI_C3J)
+#define IR_SPI_MAX_BUFSIZE		 4096*10
+#endif
 
 struct ir_spi_data {
 	u32 freq;
