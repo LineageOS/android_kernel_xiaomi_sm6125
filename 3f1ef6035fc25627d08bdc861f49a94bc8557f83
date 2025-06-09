@@ -16,6 +16,24 @@
       "message": "fyi I have this change on Xiaomi SM8150 as well, but IR changes weren\u0027t included, you sure our hw doesn\u0027t actually require a larger timeout value?\n\nhttps://review.lineageos.org/c/LineageOS/android_kernel_qcom_sm8150/+/374556",
       "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5cc4c5e_9c748780",
+        "filename": "drivers/spi/spi-geni-qcom.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 31655
+      },
+      "writtenOn": "2025-06-09T06:08:45Z",
+      "side": 0,
+      "message": "I reverted all of the changes since I\u0027m moving trinket to a different driver, and I don\u0027t think this gets used anymore. Also I didn\u0027t find any mention of timeout in ir_spi.\n\nhttps://review.lineageos.org/c/LineageOS/android_kernel_xiaomi_sm6125/+/432706/2",
+      "parentUuid": "31f0037c_ca77289d",
+      "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
