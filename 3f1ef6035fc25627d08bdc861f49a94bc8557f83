@@ -52,6 +52,24 @@
       "parentUuid": "d5cc4c5e_9c748780",
       "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4eab84e1_48f20930",
+        "filename": "drivers/spi/spi-geni-qcom.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 31655
+      },
+      "writtenOn": "2025-06-09T15:09:46Z",
+      "side": 0,
+      "message": "Done, reverted the timeout for ginkgo",
+      "parentUuid": "640b7e5b_c703bace",
+      "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
