@@ -34,6 +34,24 @@
       "parentUuid": "31f0037c_ca77289d",
       "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "640b7e5b_c703bace",
+        "filename": "drivers/spi/spi-geni-qcom.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 25732
+      },
+      "writtenOn": "2025-06-09T14:41:24Z",
+      "side": 0,
+      "message": "SPI is just a generic I/O interface, unrelated to LIRC, other stuff might be relying on this delay value\n\n- https://www.kernel.org/doc/Documentation/devicetree/bindings/spi/qcom%2Cspi-geni-qcom.txt\n- https://docs.kernel.org/driver-api/spi.html",
+      "parentUuid": "d5cc4c5e_9c748780",
+      "revId": "3f1ef6035fc25627d08bdc861f49a94bc8557f83",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
